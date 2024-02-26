@@ -1,0 +1,47 @@
+block variables
+  - var template = 'home'
+
+doctype html
+doctype
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport' content="width=device-width, initial-scale=1.0")
+
+    base(href="/")
+
+    title Chromic
+    meta(name="description" content="Chromic Jewelry")
+
+    link(rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png")
+    link(rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png")
+    link(rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png")
+    link(rel="manifest" href="/site.webmanifest")
+    link(rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5")
+    meta(name="msapplication-TileColor" content="#da532c")
+    meta(name="theme-color" content="#ffffff")
+    link(rel="stylesheet" href="main.css")
+
+    meta(propety='og:type' content='website')
+    meta(propety='og:title' content=meta.data.title)
+    meta(propety='og:description' content=meta.data.description)
+    meta(propety='og:image' content=meta.data.image ? meta.data.image.url : '')
+    meta(propety='twitter:card' content='summary_large_image')
+    meta(propety='twitter:title' content=meta.data.title)
+    meta(propety='twitter:description' content=meta.data.description)
+    meta(propety='twitter:image' content=meta.data.image ? meta.data.image.url : '')
+
+  //- Preffered by awwwards but  link is preferred for readability
+  //- style 
+
+  //- utilizing the 'include' keyword
+  //-  include ../public/main.css
+
+
+
+  body
+    include ./partials/preloader
+    include ./partials/navigation
+
+    .content#content(data-template=template)
+      block content
