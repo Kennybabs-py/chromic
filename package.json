@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "backend:build": "node app.js",
-    "backend:dev": "nodemon app.js",
+    "backend:dev": "node app.js",
     "frontend:build": "webpack --progress --config webpack.config.build.js",
     "frontend:dev": "webpack serve --progress --config webpack.config.development.js",
     "start": "concurrently --kill-others \"npm run backend:dev\"  \"npm run frontend:dev\"",
@@ -33,7 +33,9 @@
     "imagemin-svgo": "^10.0.1",
     "include-media": "^2.0.0",
     "mini-css-extract-plugin": "^2.7.6",
+    "normalize-wheel": "^1.0.1",
     "postcss-loader": "^7.3.3",
+    "prefix": "^1.0.0",
     "prettier": "^3.2.5",
     "sass": "^1.69.0",
     "sass-loader": "^13.3.2",

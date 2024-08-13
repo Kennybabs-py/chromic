@@ -4,12 +4,12 @@ block variables
   - var template = "detail";
 
 block content
-  .detail
+  .detail(data-background='#bc978c' data-color='#f9f1e7')
     .detail__wrapper
       figure.detail__media
         img.detail__media__image(
           alt=product.data.image.alt,
-          src=product.data.image.url
+          data-src=product.data.image.url
         )
 
       .detail__information

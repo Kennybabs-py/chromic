@@ -107,14 +107,6 @@ app.get("/about", async (req, res) => {
   try {
     const about = await client.getSingle("about");
     const defaults = await handleDefaults(client);
-    // console.log(
-    //   about.data.body
-    //     .filter(
-    //       (item) =>
-    //         item.slice_type === "content" && item.primary.type === "Left",
-    //     )
-    //     .map((item) => item.primary.description),
-    // );
     res.render("pages/about", { ...defaults, about });
   } catch (error) {
     console.log(`Error: ${error.message}`);

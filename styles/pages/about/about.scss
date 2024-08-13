@@ -1,11 +1,15 @@
 .about {
-  background-color: $color-cadet-blue;
-  color: $color-bright-gray;
+  @extend %page;
+
+  // background-color: $color-cadet-blue;
+  // color: $color-bright-gray;
+  opacity: 0;
 }
 .about__wrapper {
 }
 .about__title {
   @extend %title-100;
+
   max-width: 127rem;
   margin: auto;
   text-align: center;

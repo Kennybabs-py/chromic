@@ -6,6 +6,12 @@
 html {
   font-size: calc((100vw / 1920) * 10);
   line-height: 1;
+  @extend %cover;
+
+  position: fixed;
+  overflow: hidden;
+  background-color: $color-contessa;
+  color: $color-quarter-spanish-white;
 
   @include media("<phone") {
     font-size: calc((100vw / 750) * 10);
@@ -15,6 +21,9 @@ html {
 body {
   font-family: $font-suisee-bp;
   @extend %description-16;
+  @extend %cover;
+
+  position: fixed;
 }
 
 a {
@@ -33,4 +42,18 @@ button {
 
 img {
   vertical-align: middle;
+}
+
+.content {
+  @extend %cover;
+}
+
+[data-animation="title"],
+[data-animation="label"],
+[data-animation="paragraph"] {
+  span {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+  }
 }
