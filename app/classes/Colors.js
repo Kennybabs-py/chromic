@@ -14,7 +14,7 @@ class Colors {
 
   /**
    *
-   * @param {Object} backgroundColor hex value
+   * @param {{backgroundColor:string, color:string}} {background, color} hex value
    * @param {Object} color hex value
    * @returns void
    */

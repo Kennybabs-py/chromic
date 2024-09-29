@@ -117,6 +117,11 @@ export default class Page {
     this.animations.push(...this.animationsHighlights);
   }
 
+  /**
+   * @description This method is called to create the images on the page asynchronously
+   * @memberof Page
+   * @returns void
+   */
   createPreloaders() {
     this.preloaders = map(this.elements.preloaders, (element) => {
       return new AsyncLoad({ element });
@@ -157,7 +162,7 @@ export default class Page {
    */
   hide() {
     return new Promise((resolve) => {
-      this.removeEventListeners();
+      this.destroy();
 
       this.animateOut = gsap.timeline();
 
@@ -238,5 +243,9 @@ export default class Page {
    */
   removeEventListeners() {
     window.removeEventListener("mousewheel", this.onMouseWheelEvent);
+  }
+
+  destroy() {
+    this.removeEventListeners();
   }
 }

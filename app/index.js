@@ -68,19 +68,36 @@ class App {
     };
     this.page = this.pages[this.template];
     this.page.create();
-
-    // this.page.show();
   }
 
-  // /**
-  //  *  @method this.page.show was moved back to createPages because I don't
-  //  *  want white screen to show up milliseconds before autoalpha to page is applied
-  //  *  just after preloader animates out
-  //  */
+  /**
+   * @method onPreloaded
+   * @description This method is called when the preloader has finished
+   * loading the content
+   * It destroys the preloader and shows the page
+   * @returns void
+   * @example
+   * this.preloader.destroy();
+   * this.page.onResize();
+   * this.page.show();
+   * @memberof App
+   */
   onPreloaded() {
     this.preloader.destroy();
     this.page.onResize();
     this.page.show();
+  }
+
+  /**
+   * @method onPopState
+   * @description This method is called when the popstate event is triggered
+   * It calls the onChange method with the current pathname and navigates
+   * the history of the active session of the current window.
+   * The push parameter is set to false to prevent the page from being pushed to the history stack
+   * @returns void
+   */
+  onPopState() {
+    this.onChange({ url: window.location.pathname, push: false });
   }
   /**
    *
@@ -92,13 +109,18 @@ class App {
    * It also updates the template and the current page
    *
    */
-  async onChange(url) {
+  async onChange({ url, push = true }) {
     await this.page.hide();
     const request = await window.fetch(url);
 
     if (request.status === 200) {
       const html = await request.text();
       const div = document.createElement("div");
+
+      if (push) {
+        window.history.pushState({}, "", url);
+      }
+
       div.innerHTML = html;
       const divContent = div.querySelector(".content");
       this.content.innerHTML = divContent.innerHTML;
@@ -148,6 +170,7 @@ class App {
    * @description add event listeners to the window entry point
    */
   addEventListeners() {
+    window.addEventListener("popstate", this.onPopState.bind(this));
     window.addEventListener("resize", this.onResize.bind(this));
   }
 
@@ -162,7 +185,7 @@ class App {
       link.onclick = (event) => {
         event.preventDefault();
         const { href } = link;
-        this.onChange(href);
+        this.onChange({ url: href });
       };
     });
   }

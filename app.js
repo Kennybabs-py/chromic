@@ -8,6 +8,7 @@ const logger = require("morgan");
 const methodOverride = require("method-override");
 const prismic = require("@prismicio/client");
 const fetch = require("node-fetch");
+const { UAParser } = require("ua-parser-js");
 
 const app = express();
 const port = 3000;
@@ -67,6 +68,13 @@ function handleIndexResolver(index) {
  });
  */
 app.use((req, res, next) => {
+  const ua = new UAParser(req.headers["user-agent"]);
+  res.locals.isPhone = ua.getDevice().type === "mobile";
+  res.locals.isDesktop = ua.getDevice().type === undefined;
+  res.locals.isTablet = ua.getDevice().type === "tablet";
+
+  console.log(res.locals.isPhone, res.locals.isDesktop, res.locals.isTablet);
+
   res.locals.ctx = {
     prismic,
     endpoint: process.env.PRISMIC_ENDPOINT,

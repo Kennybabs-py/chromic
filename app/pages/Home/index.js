@@ -1,4 +1,5 @@
 import Page from "classes/Page";
+import Button from "classes/Button";
 
 export default class Home extends Page {
   constructor() {
@@ -7,17 +8,20 @@ export default class Home extends Page {
       element: ".home",
       elements: {
         navigation: document.querySelector(".navigation"),
-        button: ".home__link",
-        // wrapper: ".home__wrapper",
+        link: ".home__link",
       },
     });
   }
 
   create() {
     super.create();
-
-    this.elements.button.addEventListener("click", () => {
-      console.log("clicked");
+    this.link = new Button({
+      element: this.elements.link,
     });
+  }
+
+  destroy() {
+    super.destroy();
+    this.link.removeEventListeners();
   }
 }
