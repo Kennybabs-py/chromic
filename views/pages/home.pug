@@ -12,7 +12,7 @@ block content
           .home__titles__title= collection.data.title
 
       .home__gallery
-        each media in home.data.gallery
+        each media, index in home.data.gallery
           figure.home__gallery__media
             img.home__gallery__media__image(
               alt=media.image.alt,

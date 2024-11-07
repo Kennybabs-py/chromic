@@ -1,4 +1,7 @@
 import each from "lodash/each";
+import normalizeWheel from "normalize-wheel";
+
+import Canvas from "components/Canvas";
 
 import Preloader from "components/Preloader";
 import Navigation from "components/Navigation";
@@ -12,7 +15,8 @@ import Detail from "pages/Detail";
  * @class App
  * @description This class is the entry point of the application
  * It creates the preloader, the content, the pages and the link listeners
- * It also updates the current page and listens for resize events
+ * It also updates the current page and listens for resize events.
+ * It also creates the canvas for animations
  * @example
  * import App from "app";
  * new App();
@@ -22,14 +26,17 @@ import Detail from "pages/Detail";
 class App {
   constructor() {
     this.createContent();
+
+    this.createPreloader();
+    this.createNavigation();
+    this.createCanvas();
     this.createPages();
 
-    this.addLinkListeners();
+    this.onResize();
     this.update();
-    this.addEventListeners();
 
-    this.createNavigation();
-    this.createPreloader();
+    this.addLinkListeners();
+    this.addEventListeners();
   }
 
   createNavigation() {
@@ -44,6 +51,10 @@ class App {
   createPreloader() {
     this.preloader = new Preloader();
     this.preloader.once("completed", this.onPreloaded.bind(this));
+  }
+
+  createCanvas() {
+    this.canvas = new Canvas();
   }
   /**
    *
@@ -146,9 +157,59 @@ class App {
    */
   onResize() {
     if (this.page && this.page.onResize) {
-      {
-        this.page.onResize();
+      this.page.onResize();
+    }
+
+    window.requestAnimationFrame(() => {
+      if (this.canvas && this.canvas.onResize) {
+        this.canvas.onResize();
       }
+    });
+  }
+
+  /**
+   *
+   * @param {Event} event
+   * onTouchDown for canvas
+   */
+  onTouchDown(event) {
+    if (this.canvas && this.canvas.onTouchDown) {
+      this.canvas.onTouchDown(event);
+    }
+  }
+  /**
+   *
+   * @param {Event} event
+   * onTouchMove for canvas
+   */
+  onTouchMove(event) {
+    if (this.canvas && this.canvas.onTouchMove) {
+      this.canvas.onTouchMove(event);
+    }
+  }
+  /**
+   *
+   * @param {Event} event
+   * onTouchUp for canvas
+   */
+  onTouchUp(event) {
+    if (this.canvas && this.canvas.onTouchUp) {
+      this.canvas.onTouchUp(event);
+    }
+  }
+
+  /**
+   *
+   * @param {Event} event
+   * onWheel event
+   */
+  onWheel(event) {
+    const normalizedWheel = normalizeWheel(event);
+    if (this.page && this.page.onWheel) {
+      this.page.onWheel(normalizedWheel);
+    }
+    if (this.canvas && this.canvas.onWheel) {
+      this.canvas.onWheel(normalizedWheel);
     }
   }
   /**
@@ -157,10 +218,12 @@ class App {
    * @returns void
    */
   update() {
+    if (this.canvas && this.canvas.update) {
+      this.canvas.update();
+    }
+
     if (this.page && this.page.update) {
-      {
-        this.page.update();
-      }
+      this.page.update();
       this.frame = window.requestAnimationFrame(this.update.bind(this));
     }
   }
@@ -170,6 +233,16 @@ class App {
    * @description add event listeners to the window entry point
    */
   addEventListeners() {
+    window.addEventListener("wheel", this.onWheel.bind(this));
+
+    window.addEventListener("mousedown", this.onTouchDown.bind(this));
+    window.addEventListener("mousemove", this.onTouchMove.bind(this));
+    window.addEventListener("mouseup", this.onTouchUp.bind(this));
+
+    window.addEventListener("touchstart", this.onTouchDown.bind(this));
+    window.addEventListener("touchmove", this.onTouchMove.bind(this));
+    window.addEventListener("touchend", this.onTouchUp.bind(this));
+
     window.addEventListener("popstate", this.onPopState.bind(this));
     window.addEventListener("resize", this.onResize.bind(this));
   }

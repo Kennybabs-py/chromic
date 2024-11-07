@@ -73,8 +73,6 @@ app.use((req, res, next) => {
   res.locals.isDesktop = ua.getDevice().type === undefined;
   res.locals.isTablet = ua.getDevice().type === "tablet";
 
-  console.log(res.locals.isPhone, res.locals.isDesktop, res.locals.isTablet);
-
   res.locals.ctx = {
     prismic,
     endpoint: process.env.PRISMIC_ENDPOINT,

@@ -2,7 +2,6 @@ import each from "lodash/each";
 import map from "lodash/map";
 import gsap from "gsap";
 import Prefix from "prefix";
-import normalizeWheel from "normalize-wheel";
 
 import Title from "animations/Title";
 import Label from "animations/Label";
@@ -36,7 +35,7 @@ export default class Page {
     };
 
     this.id = id;
-    this.onMouseWheelEvent = this.onMouseWheel.bind(this);
+    this.onMouseWheelEvent = this.onWheel.bind(this);
     this.transformPrefix = Prefix("transform");
   }
 
@@ -178,8 +177,7 @@ export default class Page {
    * @param {*} event
    * This method is called when the mouse wheel is scrolled
    */
-  onMouseWheel(event) {
-    const { pixelY } = normalizeWheel(event);
+  onWheel({ pixelY }) {
     this.scroll.target += pixelY;
   }
 
@@ -234,7 +232,7 @@ export default class Page {
    * @description This method is called to add event listeners to the current page
    */
   addEventListeners() {
-    window.addEventListener("mousewheel", this.onMouseWheelEvent);
+    // window.addEventListener("mousewheel", this.onMouseWheelEvent);
   }
 
   /**
@@ -242,7 +240,7 @@ export default class Page {
    * @description This method is called to remove event listeners
    */
   removeEventListeners() {
-    window.removeEventListener("mousewheel", this.onMouseWheelEvent);
+    // window.removeEventListener("mousewheel", this.onMouseWheelEvent);
   }
 
   destroy() {
