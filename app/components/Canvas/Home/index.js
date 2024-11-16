@@ -7,6 +7,7 @@ import Media from "./Media";
 export default class Home {
   constructor({ gl, scene, sizes }) {
     this.gl = gl;
+    this.scene = scene;
     this.group = new Transform();
     this.sizes = sizes;
 
@@ -38,14 +39,26 @@ export default class Home {
       y: 0,
     };
 
+    // Speed of the mouse dragging
+    this.speed = {
+      current: 0,
+      target: 0,
+      lerp: 0.1,
+    };
+
     this.createGeometry();
     this.createGallery();
 
-    this.group.setParent(scene);
+    this.group.setParent(this.scene);
+    this.show();
   }
 
   createGeometry() {
-    this.geometry = new Plane(this.gl);
+    // The heightSegment & widthSegment gives more vertices to the plane
+    this.geometry = new Plane(this.gl, {
+      heightSegments: 20,
+      widthSegments: 20,
+    });
   }
   createGallery() {
     this.medias = map(this.mediaElements, (element, index) => {
@@ -57,6 +70,18 @@ export default class Home {
         scene: this.group,
         sizes: this.sizes,
       });
+    });
+  }
+
+  show() {
+    map(this.medias, (media) => {
+      media.show();
+    });
+  }
+
+  hide() {
+    map(this.medias, (media) => {
+      media.hide();
     });
   }
 
@@ -117,6 +142,19 @@ export default class Home {
    */
   update() {
     if (!this.galleryBounds) return;
+
+    // Using pythagoras to get the speed of cursor or touch movement from a current
+    // to a target position
+    const a = this.x.target - this.x.current;
+    const b = this.y.target - this.y.current;
+    this.speed.target = Math.sqrt(a * a + b * b) * 0.001;
+
+    this.speed.current = gsap.utils.interpolate(
+      this.speed.current,
+      this.speed.target,
+      this.speed.lerp,
+    );
+
     // This updates the current position of scroll with the target after scrolling
     this.x.current = gsap.utils.interpolate(
       this.x.current,
@@ -195,7 +233,11 @@ export default class Home {
         }
       }
 
-      media.update(this.scroll);
+      media.update(this.scroll, this.speed.current);
     });
+  }
+
+  destroy() {
+    this.scene.removeChild(this.group);
   }
 }

@@ -19,22 +19,16 @@ export default class Highlight extends Animation {
   }
 
   animateIn() {
-    this.timelineIn = gsap.timeline({
-      delay: 0.5,
-    });
-    this.timelineIn.fromTo(
+    gsap.fromTo(
       this.element,
       {
         autoAlpha: 0,
-        scale: 1.2,
+        delay: 0.5,
       },
       {
         autoAlpha: 1,
-        ease: "expo.out",
-        scale: 1,
-        duration: 1.5,
+        duration: 1,
       },
-      0,
     );
   }
 

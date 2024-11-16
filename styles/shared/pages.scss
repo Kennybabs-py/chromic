@@ -1,6 +1,6 @@
 %page {
   @extend %cover;
-
+  z-index: z("content");
   opacity: 0;
   visibility: hidden;
 }

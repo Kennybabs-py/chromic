@@ -10,13 +10,21 @@ block content
         each collection, index in collections
           .collections__titles__label!= `${home.data.collection}<br>${indexResolver(index)}`
           .collections__titles__title= collection.data.title
+        
+        each collection, index in collections
+          .collections__titles__label!= `${home.data.collection}<br>${indexResolver(index)}`
+          .collections__titles__title= collection.data.title
+        
+        each collection, index in collections
+          .collections__titles__label!= `${home.data.collection}<br>${indexResolver(index)}`
+          .collections__titles__title= collection.data.title
 
       .collections__gallery
         .collections__gallery__wrapper
-          each collection in collections
+          each collection, index in collections
             each product in collection.data.products
               a.collections__gallery__link(href=linkResolver(product.products_product))
-                figure.collections__gallery__media
+                figure.collections__gallery__media(data-collection-index=index,)
                   img.collections__gallery__media__image(
                     alt=product.products_product.data.image.alt,
                     data-src=product.products_product.data.image.url
@@ -33,3 +41,5 @@ block content
           .collections__mobile__item
             .collections__mobile__item__label!=`${home.data.collection}<br>${indexResolver(index)}`
             .collections__mobile__item__title= collection.data.title
+      
+

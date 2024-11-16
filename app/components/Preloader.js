@@ -1,5 +1,5 @@
-import each from "lodash/each";
 import gsap from "gsap";
+import { Texture } from "ogl";
 
 import Component from "classes/Component";
 import { split } from "utils/text";
@@ -14,16 +14,18 @@ import { split } from "utils/text";
  * and can be extended by other preloaders
  */
 export default class Preloader extends Component {
-  constructor() {
+  constructor({ canvas }) {
     super({
       element: ".preloader",
       elements: {
         title: ".preloader__text",
         number: ".preloader__number",
         numberText: ".preloader__number__text",
-        images: document.querySelectorAll("img"),
       },
     });
+    this.canvas = canvas;
+
+    window.TEXTURES = {};
 
     split({
       element: this.elements.title,
@@ -44,15 +46,27 @@ export default class Preloader extends Component {
   }
 
   createLoader() {
-    each(this.elements.images, (element) => {
-      element.onload = () => this.onAssetLoaded(element);
-      element.src = element.getAttribute("data-src");
+    window.ASSETS.forEach((image) => {
+      const texture = new Texture(this.canvas.gl, {
+        generateMipmaps: false,
+      });
+
+      const newImage = new window.Image();
+      newImage.crossOrigin = "anonymous";
+      newImage.src = image;
+
+      newImage.onload = () => {
+        texture.image = newImage;
+        this.onAssetLoaded();
+      };
+
+      window.TEXTURES[image] = texture;
     });
   }
 
-  onAssetLoaded(image) {
+  onAssetLoaded() {
     this.length += 1;
-    const percent = this.length / this.elements.images.length;
+    const percent = this.length / window.ASSETS.length;
 
     this.elements.numberText.innerHTML = `${Math.round(percent * 100)}%`;
     if (percent === 1) {
@@ -62,7 +76,9 @@ export default class Preloader extends Component {
 
   onLoaded() {
     return new Promise((resolve) => {
-      this.animateOut = gsap.timeline({ delay: 2 });
+      this.emit("completed");
+
+      this.animateOut = gsap.timeline({ delay: 1 });
 
       this.animateOut.to(this.elements.titleSpans, {
         autoAlpha: 0,
@@ -86,16 +102,13 @@ export default class Preloader extends Component {
       this.animateOut.to(
         this.element,
         {
-          scaleY: 0,
-          transformOrigin: "100% 100%",
+          autoAlpha: 0,
           duration: 1,
-          ease: "expo.out",
         },
         "-=1",
       );
-      this.animateOut.call(() => {
-        this.emit("completed");
-      });
+
+      this.animateOut.call(() => this.destroy());
     });
   }
 

@@ -1,4 +1,4 @@
-import { Program, Mesh, Texture } from "ogl";
+import { Program, Mesh } from "ogl";
 import gsap from "gsap";
 
 import vertex from "shaders/plane-vertex.vert";
@@ -25,18 +25,15 @@ export default class Media {
   }
 
   createTexture() {
-    this.texture = new Texture(this.gl);
-    this.image = new Image();
-    this.image.crossOrigin = "anonymous";
-    this.image.src = this.element.getAttribute("data-src");
-    this.image.onload = (_) => (this.texture.image = this.image);
+    const elementImage = this.element.querySelector("img");
+    this.texture = window.TEXTURES[elementImage.getAttribute("data-src")];
   }
 
   createProgram() {
     this.program = new Program(this.gl, {
       vertex: vertex,
       fragment: fragment,
-      uniforms: { tMap: { value: this.texture } },
+      uniforms: { uAlpha: { value: 0 }, tMap: { value: this.texture } },
     });
   }
 
@@ -47,8 +44,6 @@ export default class Media {
     });
 
     this.mesh.setParent(this.scene);
-
-    this.mesh.rotation.z = gsap.utils.random(-Math.PI * 0.03, Math.PI * 0.03);
   }
 
   createBounds({ sizes }) {
@@ -61,15 +56,34 @@ export default class Media {
     this.updateY();
   }
 
+  show() {
+    gsap.fromTo(this.program.uniforms.uAlpha, { value: 0 }, { value: 1 });
+  }
+
+  hide() {
+    gsap.to(this.program.uniforms.uAlpha, { value: 0 });
+  }
+
   onResize(event, scroll) {
-    this.extra = {
-      x: 0,
-      y: 0,
-    };
+    this.extra = 0;
 
     this.createBounds(event);
-    this.updateX(scroll.x);
-    this.updateY(scroll.y);
+    this.updateX(scroll);
+    this.updateY(0);
+  }
+
+  /**
+   * This maps the width range of the canvas field of view to PI
+   * to get an accurate mapped value of rotation based on the x-position
+   */
+  updateRotation() {
+    this.mesh.rotation.z = gsap.utils.mapRange(
+      -this.sizes.width / 2,
+      this.sizes.width / 2,
+      Math.PI * 0.1,
+      -Math.PI * 0.1,
+      this.mesh.position.x,
+    );
   }
 
   updateScale() {
@@ -88,7 +102,7 @@ export default class Media {
       -this.sizes.width / 2 +
       this.mesh.scale.x / 2 +
       this.x * this.sizes.width +
-      this.extra.x;
+      this.extra;
   }
 
   updateY(y = 0) {
@@ -97,13 +111,17 @@ export default class Media {
     this.mesh.position.y =
       this.sizes.height / 2 -
       this.mesh.scale.y / 2 -
-      this.y * this.sizes.height +
-      this.extra.y;
+      this.y * this.sizes.height;
+
+    this.mesh.position.y +=
+      Math.cos((this.mesh.position.x / this.sizes.width) * Math.PI * 0.1) * 50 -
+      50;
   }
   update(scroll) {
     if (!this.bounds) return;
+    this.updateRotation();
 
-    this.updateX(scroll.x);
-    this.updateY(scroll.y);
+    this.updateX(scroll);
+    this.updateY(0);
   }
 }

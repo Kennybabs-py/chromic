@@ -95,25 +95,49 @@ async function handleDefaults(api) {
   const meta = await api.getSingle("metadata");
   const navigation = await api.getSingle("navigation");
   const preloader = await api.getSingle("preloader");
-  return { meta, navigation, preloader };
+  const home = await client.getSingle("home");
+  const collections = await client.getAllByType("collection", {
+    fetchLinks: "produc.image",
+  });
+  const about = await client.getSingle("about");
+
+  let assets = [];
+  home.data.gallery.forEach((item) => {
+    assets.push(item.image.url);
+  });
+  about.data.gallery.forEach((item) => {
+    assets.push(item.image.url);
+  });
+
+  about.data.body.forEach((section) => {
+    if (section.slice_type === "gallery") {
+      section.items.forEach((item) => {
+        assets.push(item.image.url);
+      });
+    }
+  });
+
+  collections.forEach((collection) => {
+    collection.data.products.forEach((product) => {
+      assets.push(product.products_product.data.image.url);
+    });
+  });
+
+  return { assets, meta, navigation, preloader, home, collections, about };
 }
 
 //* Home page
 app.get("/", async (req, res) => {
-  const home = await client.getSingle("home");
   const defaults = await handleDefaults(client);
-  const collections = await client.getAllByType("collection", {
-    fetchLinks: "produc.image",
-  });
-  res.render("pages/home", { ...defaults, home, collections });
+  res.render("pages/home", { ...defaults });
 });
 
 //* About page
 app.get("/about", async (req, res) => {
   try {
-    const about = await client.getSingle("about");
     const defaults = await handleDefaults(client);
-    res.render("pages/about", { ...defaults, about });
+
+    res.render("pages/about", { ...defaults });
   } catch (error) {
     console.log(`Error: ${error.message}`);
   }
@@ -123,14 +147,9 @@ app.get("/about", async (req, res) => {
 app.get("/collections", async (req, res) => {
   try {
     const defaults = await handleDefaults(client);
-    const home = await client.getSingle("home");
-    const collections = await client.getAllByType("collection", {
-      fetchLinks: "produc.image",
-    });
+
     res.render("pages/collections", {
       ...defaults,
-      collections,
-      home,
     });
   } catch (error) {
     console.log(`Error: ${error.message}`);

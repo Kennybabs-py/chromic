@@ -1,9 +1,13 @@
 import { Camera, Renderer, Transform } from "ogl";
 
 import Home from "./Home";
+import About from "./About";
+import Collections from "./Collections";
 
 export default class Canvas {
-  constructor() {
+  constructor({ template }) {
+    this.template = template;
+
     this.x = {
       start: 0,
       distance: 0,
@@ -19,7 +23,6 @@ export default class Canvas {
     this.createScene();
 
     this.onResize();
-    this.createHome();
   }
 
   createRenderer() {
@@ -41,6 +44,82 @@ export default class Canvas {
     this.home = new Home({ gl: this.gl, scene: this.scene, sizes: this.sizes });
   }
 
+  destroyHome() {
+    if (!this.home) return;
+    this.home.destroy();
+    this.home = null;
+  }
+
+  createAbout() {
+    this.about = new About({
+      gl: this.gl,
+      scene: this.scene,
+      sizes: this.sizes,
+    });
+  }
+
+  destroyAbout() {
+    if (!this.about) return;
+    this.about.destroy();
+    this.about = null;
+  }
+
+  createCollections() {
+    this.collections = new Collections({
+      gl: this.gl,
+      scene: this.scene,
+      sizes: this.sizes,
+    });
+  }
+
+  destroyCollections() {
+    if (!this.collections) return;
+    this.collections.destroy();
+    this.collections = null;
+  }
+
+  onPreloaded() {
+    this.onChangeEnd(this.template);
+  }
+
+  /**
+   * for hiding canvas on an active page
+   */
+  onChangeStart() {
+    if (this.home) {
+      this.home.hide();
+    }
+    if (this.about) {
+      this.about.hide();
+    }
+    if (this.collections) {
+      this.collections.hide();
+    }
+  }
+
+  /**
+   * creates active page scene on change of route
+   * @argument {string} template
+   */
+  onChangeEnd(template) {
+    if (template === "home") {
+      this.createHome();
+    } else if (this.home) {
+      this.destroyHome();
+    }
+
+    if (template === "about") {
+      this.createAbout();
+    } else if (this.about) {
+      this.destroyAbout();
+    }
+    if (template === "collections") {
+      this.createCollections();
+    } else if (this.collections) {
+      this.destroyCollections();
+    }
+  }
+
   onResize() {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.camera.perspective({
@@ -59,6 +138,12 @@ export default class Canvas {
     if (this.home) {
       this.home.onResize({ sizes: this.sizes });
     }
+    if (this.about) {
+      this.about.onResize({ sizes: this.sizes });
+    }
+    if (this.collections) {
+      this.collections.onResize({ sizes: this.sizes });
+    }
   }
 
   /**
@@ -74,6 +159,12 @@ export default class Canvas {
 
     if (this.home) {
       this.home.onTouchDown({ x: this.x.start, y: this.y.start });
+    }
+    if (this.about) {
+      this.about.onTouchDown({ x: this.x.start, y: this.y.start });
+    }
+    if (this.collections) {
+      this.collections.onTouchDown({ x: this.x.start, y: this.y.start });
     }
   }
   /**
@@ -92,6 +183,13 @@ export default class Canvas {
 
     if (this.home) {
       this.home.onTouchMove({ x: this.x, y: this.y });
+    }
+
+    if (this.about) {
+      this.about.onTouchMove({ x: this.x, y: this.y });
+    }
+    if (this.collections) {
+      this.collections.onTouchMove({ x: this.x, y: this.y });
     }
   }
   /**
@@ -114,17 +212,32 @@ export default class Canvas {
     if (this.home) {
       this.home.onTouchUp({ x: this.x, y: this.y });
     }
-  }
-
-  onWheel(event) {
-    if (this.home.onWheel) {
-      this.home.onWheel(event);
+    if (this.about) {
+      this.about.onTouchUp({ x: this.x, y: this.y });
+    }
+    if (this.collections) {
+      this.collections.onTouchUp({ x: this.x, y: this.y });
     }
   }
 
-  update() {
+  onWheel(event) {
+    if (this.home) {
+      this.home.onWheel(event);
+    }
+    if (this.collections) {
+      this.collections.onWheel(event);
+    }
+  }
+
+  update(scroll) {
     if (this.home) {
       this.home.update();
+    }
+    if (this.about) {
+      this.about.update(scroll);
+    }
+    if (this.collections) {
+      this.collections.update();
     }
     this.renderer.render({ camera: this.camera, scene: this.scene });
     this.renderer.render({ camera: this.camera, scene: this.scene });

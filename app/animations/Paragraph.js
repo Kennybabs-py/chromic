@@ -1,8 +1,8 @@
 import gsap from "gsap";
-import each from "lodash/each";
+// import each from "lodash/each";
 
 import Animation from "classes/Animation";
-import { calculate, split } from "utils/text";
+// import { calculate, split } from "utils/text";
 
 /**
  * @description This class is used to create an animation
@@ -19,36 +19,24 @@ export default class Paragraph extends Animation {
       elements,
     });
 
-    this.elementLinesSpans = split({
-      element: this.element,
-      append: true,
-    });
+    // this.elementLinesSpans = split({
+    //   element: this.element,
+    //   append: true,
+    // });
   }
 
   animateIn() {
-    this.timelineIn = gsap.timeline({
-      delay: 0.5,
-    });
-    this.timelineIn.set(this.element, {
-      autoAlpha: 1,
-    });
-    each(this.elementsLines, (line, index) => {
-      this.timelineIn.fromTo(
-        line,
-        {
-          y: "100%",
-          autoAlpha: 0,
-        },
-        {
-          y: "0%",
-          autoAlpha: 1,
-          ease: "expo.out",
-          duration: 1.5,
-          delay: index * 0.2,
-        },
-        0,
-      );
-    });
+    gsap.fromTo(
+      this.element,
+      {
+        autoAlpha: 0,
+        delay: 0.5,
+      },
+      {
+        autoAlpha: 1,
+        duration: 1,
+      },
+    );
   }
 
   animateOut() {
@@ -62,7 +50,7 @@ export default class Paragraph extends Animation {
    * @memberof Title
    * @returns void
    */
-  onResize() {
-    this.elementsLines = calculate(this.elementLinesSpans);
-  }
+  // onResize() {
+  //   this.elementsLines = calculate(this.elementLinesSpans);
+  // }
 }

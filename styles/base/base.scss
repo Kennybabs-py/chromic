@@ -34,6 +34,12 @@ a {
   color: inherit;
 }
 
+canvas {
+  position: relative;
+  pointer-events: none;
+  z-index: z("canvas");
+}
+
 button {
   background: none;
   color: inherit;

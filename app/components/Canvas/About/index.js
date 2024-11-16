@@ -13,6 +13,8 @@ export default class About {
     this.createGalleries();
 
     this.group.setParent(scene);
+
+    this.show();
   }
 
   createGeometry() {
@@ -30,6 +32,18 @@ export default class About {
         scene: this.group,
         sizes: this.sizes,
       });
+    });
+  }
+
+  show() {
+    map(this.galleries, (gallery) => {
+      gallery.show();
+    });
+  }
+
+  hide() {
+    map(this.galleries, (gallery) => {
+      gallery.hide();
     });
   }
 
@@ -77,9 +91,15 @@ export default class About {
    * @param {{x:number, y:number}} {x, y}
    * Scroll update
    */
-  update() {
+  update(scroll) {
     map(this.galleries, (gallery, _) => {
-      gallery.update(this.scroll);
+      gallery.update(scroll);
+    });
+  }
+
+  destroy() {
+    map(this.galleries, (gallery) => {
+      gallery.destroy();
     });
   }
 }

@@ -26,7 +26,7 @@ block content
               .about__content__box
                 p.about__content__label(data-animation='label')!=section.primary.label
 
-                .about__content__description(data-animation='paragraph')!=ctx.prismic.asHTML(section.primary.description)
+                .about__content__description(data-animation='paragraph')!=ctx.prismic.asHTML(section.primary.description).replace(/\n/g, '<br>')
 
               figure.about__content__media
                 img.about__content__media__image(

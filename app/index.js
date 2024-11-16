@@ -27,16 +27,16 @@ class App {
   constructor() {
     this.createContent();
 
+    this.createCanvas();
     this.createPreloader();
     this.createNavigation();
-    this.createCanvas();
     this.createPages();
-
-    this.onResize();
-    this.update();
 
     this.addLinkListeners();
     this.addEventListeners();
+
+    this.onResize();
+    this.update();
   }
 
   createNavigation() {
@@ -49,12 +49,16 @@ class App {
    * @returns void
    */
   createPreloader() {
-    this.preloader = new Preloader();
+    this.preloader = new Preloader({ canvas: this.canvas });
     this.preloader.once("completed", this.onPreloaded.bind(this));
   }
 
+  /**
+   * @method createCanvas
+   * Creates canvas for app webgl elements
+   */
   createCanvas() {
-    this.canvas = new Canvas();
+    this.canvas = new Canvas({ template: this.template });
   }
   /**
    *
@@ -94,8 +98,8 @@ class App {
    * @memberof App
    */
   onPreloaded() {
-    this.preloader.destroy();
-    this.page.onResize();
+    this.onResize();
+    this.canvas.onPreloaded();
     this.page.show();
   }
 
@@ -121,6 +125,8 @@ class App {
    *
    */
   async onChange({ url, push = true }) {
+    this.canvas.onChangeStart();
+
     await this.page.hide();
     const request = await window.fetch(url);
 
@@ -134,15 +140,18 @@ class App {
 
       div.innerHTML = html;
       const divContent = div.querySelector(".content");
-      this.content.innerHTML = divContent.innerHTML;
       this.template = divContent.getAttribute("data-template");
 
       this.navigation.onChange(this.template);
-      this.content.setAttribute("data-template", this.template);
-      this.page = this.pages[this.template];
 
+      this.content.innerHTML = divContent.innerHTML;
+      this.content.setAttribute("data-template", this.template);
+
+      this.canvas.onChangeEnd(this.template);
+
+      this.page = this.pages[this.template];
       this.page.create();
-      this.page.onResize();
+      this.onResize();
       await this.page.show();
 
       this.addLinkListeners();
@@ -218,14 +227,17 @@ class App {
    * @returns void
    */
   update() {
-    if (this.canvas && this.canvas.update) {
-      this.canvas.update();
-    }
-
     if (this.page && this.page.update) {
       this.page.update();
-      this.frame = window.requestAnimationFrame(this.update.bind(this));
     }
+
+    if (this.canvas && this.canvas.update) {
+      // The argument is passed to get the current page scroll so as to translate the
+      // canvas gallery in sections that needs to be transalated
+      this.canvas.update(this.page.scroll);
+    }
+
+    this.frame = window.requestAnimationFrame(this.update.bind(this));
   }
 
   /**

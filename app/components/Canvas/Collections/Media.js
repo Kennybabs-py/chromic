@@ -1,8 +1,8 @@
 import { Program, Mesh } from "ogl";
 import gsap from "gsap";
 
-import vertex from "shaders/home-vertex.vert";
-import fragment from "shaders/home-fragment.frag";
+import vertex from "shaders/plane-vertex.vert";
+import fragment from "shaders/plane-fragment.frag";
 
 export default class Media {
   constructor({ element, index, geometry, gl, scene, sizes }) {
@@ -25,19 +25,17 @@ export default class Media {
   }
 
   createTexture() {
-    this.texture = window.TEXTURES[this.element.getAttribute("data-src")];
+    const elementImage = this.element.querySelector(
+      ".collections__gallery__media__image",
+    );
+    this.texture = window.TEXTURES[elementImage.getAttribute("data-src")];
   }
 
   createProgram() {
     this.program = new Program(this.gl, {
       vertex: vertex,
       fragment: fragment,
-      uniforms: {
-        uAlpha: { value: 0 },
-        uSpeed: { value: 0 },
-        uViewportSizes: { value: [this.sizes.width, this.sizes.height] },
-        tMap: { value: this.texture },
-      },
+      uniforms: { uAlpha: { value: 0 }, tMap: { value: this.texture } },
     });
   }
 
@@ -48,8 +46,6 @@ export default class Media {
     });
 
     this.mesh.setParent(this.scene);
-
-    this.mesh.rotation.z = gsap.utils.random(-Math.PI * 0.03, Math.PI * 0.03);
   }
 
   createBounds({ sizes }) {
@@ -63,7 +59,7 @@ export default class Media {
   }
 
   show() {
-    gsap.fromTo(this.program.uniforms.uAlpha, { value: 0 }, { value: 0.4 });
+    gsap.fromTo(this.program.uniforms.uAlpha, { value: 0 }, { value: 1 });
   }
 
   hide() {
@@ -109,12 +105,10 @@ export default class Media {
       this.y * this.sizes.height +
       this.extra.y;
   }
-  update(scroll, speed) {
+  update(scroll) {
     if (!this.bounds) return;
 
-    this.updateX(scroll.x);
-    this.updateY(scroll.y);
-
-    this.program.uniforms.uSpeed.value = speed;
+    this.updateX(scroll);
+    this.updateY(0);
   }
 }
