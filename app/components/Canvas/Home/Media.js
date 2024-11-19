@@ -22,6 +22,8 @@ export default class Media {
       x: 0,
       y: 0,
     };
+
+    this.createBounds({ sizes: this.sizes });
   }
 
   createTexture() {
@@ -110,8 +112,6 @@ export default class Media {
       this.extra.y;
   }
   update(scroll, speed) {
-    if (!this.bounds) return;
-
     this.updateX(scroll.x);
     this.updateY(scroll.y);
 

@@ -1,8 +1,8 @@
 import { Program, Mesh } from "ogl";
 import gsap from "gsap";
 
-import vertex from "shaders/plane-vertex.vert";
-import fragment from "shaders/plane-fragment.frag";
+import vertex from "shaders/collections-vertex.vert";
+import fragment from "shaders/collections-fragment.frag";
 
 export default class Media {
   constructor({ element, index, geometry, gl, scene, sizes }) {
@@ -13,15 +13,23 @@ export default class Media {
     this.sizes = sizes;
     this.index = index;
 
-    this.createTexture();
-    this.createProgram();
-    this.createMesh();
-
     // The recurring dom element after scroll
     this.extra = {
       x: 0,
       y: 0,
     };
+
+    this.opacity = {
+      current: 0,
+      target: 0,
+      lerp: 0.1,
+      multiplier: 0,
+    };
+
+    this.createTexture();
+    this.createProgram();
+    this.createMesh();
+    this.createBounds({ sizes: this.sizes });
   }
 
   createTexture() {
@@ -59,11 +67,11 @@ export default class Media {
   }
 
   show() {
-    gsap.fromTo(this.program.uniforms.uAlpha, { value: 0 }, { value: 1 });
+    gsap.fromTo(this.opacity, { multiplier: 0 }, { multiplier: 1 });
   }
 
   hide() {
-    gsap.to(this.program.uniforms.uAlpha, { value: 0 });
+    gsap.to(this.opacity, { multiplier: 0 });
   }
 
   onResize(event, scroll) {
@@ -105,10 +113,25 @@ export default class Media {
       this.y * this.sizes.height +
       this.extra.y;
   }
-  update(scroll) {
-    if (!this.bounds) return;
-
+  update(scroll, index) {
     this.updateX(scroll);
     this.updateY(0);
+
+    const amplitude = 0.1;
+    const frequency = 1;
+
+    this.mesh.rotation.z = -0.02 * Math.PI * Math.sin(this.index / frequency);
+    this.mesh.position.y = amplitude * Math.sin(this.index / frequency);
+
+    // Setting the opacity of the card
+    this.opacity.target = index === this.index ? 1 : 0.4;
+    this.opacity.current = gsap.utils.interpolate(
+      this.opacity.current,
+      this.opacity.target,
+      this.opacity.lerp,
+    );
+
+    this.program.uniforms.uAlpha.value =
+      this.opacity.multiplier * this.opacity.current;
   }
 }

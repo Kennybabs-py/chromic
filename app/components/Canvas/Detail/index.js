@@ -1,34 +1,31 @@
-import { Program, Mesh } from "ogl";
+import { Program, Mesh, Plane } from "ogl";
 import gsap from "gsap";
 
 import vertex from "shaders/plane-vertex.vert";
 import fragment from "shaders/plane-fragment.frag";
 
-export default class Media {
-  constructor({ element, index, geometry, gl, scene, sizes }) {
-    this.element = element;
+export default class Detail {
+  constructor({ gl, scene, sizes, transition }) {
+    this.id = "detail";
+    this.element = document.querySelector(".detail__media__image");
     this.gl = gl;
-    this.geometry = geometry;
     this.scene = scene;
     this.sizes = sizes;
-    this.index = index;
+    this.transition = transition;
+
+    this.geometry = new Plane(this.gl);
 
     this.createTexture();
     this.createProgram();
     this.createMesh();
-
-    // The recurring dom element after scroll
-    this.extra = {
-      x: 0,
-      y: 0,
-    };
-
     this.createBounds({ sizes: this.sizes });
+
+    this.show();
   }
 
   createTexture() {
-    const elementImage = this.element.querySelector("img");
-    this.texture = window.TEXTURES[elementImage.getAttribute("data-src")];
+    const elementImageSrc = this.element.getAttribute("data-src");
+    this.texture = window.TEXTURES[elementImageSrc];
   }
 
   createProgram() {
@@ -45,6 +42,7 @@ export default class Media {
       program: this.program,
     });
 
+    this.mesh.rotation.z = Math.PI * 0.01;
     this.mesh.setParent(this.scene);
   }
 
@@ -59,34 +57,40 @@ export default class Media {
   }
 
   show() {
-    gsap.fromTo(this.program.uniforms.uAlpha, { value: 0 }, { value: 1 });
+    if (this.transition) {
+      this.transition.animate(this.mesh, (_) => {
+        this.program.uniforms.uAlpha.value = 1;
+      });
+    } else {
+      gsap.to(this.program.uniforms.uAlpha, { value: 1 });
+    }
   }
 
   hide() {
     gsap.to(this.program.uniforms.uAlpha, { value: 0 });
   }
 
-  onResize(event, scroll) {
-    this.extra = 0;
-
+  onResize(event) {
     this.createBounds(event);
-    this.updateX(scroll);
-    this.updateY(0);
+    this.updateX();
+    this.updateY();
   }
 
   /**
-   * This maps the width range of the canvas field of view to PI
-   * to get an accurate mapped value of rotation based on the x-position
+   *
+   * @param {Event} event
    */
-  updateRotation() {
-    this.mesh.rotation.z = gsap.utils.mapRange(
-      -this.sizes.width / 2,
-      this.sizes.width / 2,
-      Math.PI * 0.1,
-      -Math.PI * 0.1,
-      this.mesh.position.x,
-    );
-  }
+  onTouchDown(event) {}
+  /**
+   *
+   * @param {Event} event
+   */
+  onTouchMove(event) {}
+  /**
+   *
+   * @param {Event} event
+   */
+  onTouchUp(event) {}
 
   updateScale() {
     // To get the percentage of dom width & height in the window
@@ -97,32 +101,27 @@ export default class Media {
     this.mesh.scale.y = this.sizes.height * this.height;
   }
 
-  updateX(x = 0) {
-    this.x = (this.bounds.left + x) / window.innerWidth;
+  updateX() {
+    this.x = this.bounds.left / window.innerWidth;
 
     this.mesh.position.x =
-      -this.sizes.width / 2 +
-      this.mesh.scale.x / 2 +
-      this.x * this.sizes.width +
-      this.extra;
+      -this.sizes.width / 2 + this.mesh.scale.x / 2 + this.x * this.sizes.width;
   }
 
-  updateY(y = 0) {
-    this.y = (this.bounds.top + y) / window.innerHeight;
+  updateY() {
+    this.y = this.bounds.top / window.innerHeight;
 
     this.mesh.position.y =
       this.sizes.height / 2 -
       this.mesh.scale.y / 2 -
       this.y * this.sizes.height;
-
-    this.mesh.position.y +=
-      Math.cos((this.mesh.position.x / this.sizes.width) * Math.PI * 0.1) * 50 -
-      50;
   }
-  update(scroll) {
-    this.updateRotation();
+  update() {
+    this.updateX();
+    this.updateY();
+  }
 
-    this.updateX(scroll);
-    this.updateY(0);
+  destroy() {
+    this.scene.removeChild(this.mesh);
   }
 }

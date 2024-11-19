@@ -3,12 +3,15 @@ import { Plane, Transform } from "ogl";
 import gsap from "gsap";
 import Prefix from "prefix";
 import Media from "./Media";
+
 export default class Collections {
-  constructor({ gl, scene, sizes }) {
+  constructor({ gl, scene, sizes, transition }) {
+    this.id = "collections";
     this.gl = gl;
     this.scene = scene;
     this.group = new Transform();
     this.sizes = sizes;
+    this.transition = transition;
 
     this.transformPrefix = Prefix("transform");
 
@@ -42,6 +45,7 @@ export default class Collections {
 
     this.createGeometry();
     this.createGallery();
+    this.onResize({ sizes: this.sizes });
 
     this.group.setParent(this.scene);
     this.show();
@@ -64,9 +68,48 @@ export default class Collections {
   }
 
   show() {
-    map(this.medias, (media) => {
-      media.show();
-    });
+    if (this.transition) {
+      // this.media.opacity.multiplier = 0;
+
+      const { src } = this.transition.mesh.program.uniforms.tMap.value.image;
+      const texture = window.TEXTURES[src];
+      const selectedMedia = this.medias.find(
+        (media) => media.texture === texture,
+      );
+      const scroll =
+        -selectedMedia.bounds.left -
+        selectedMedia.bounds.width / 2 +
+        window.innerWidth / 2;
+
+      this.update();
+
+      this.transition.animate(
+        {
+          rotation: selectedMedia.mesh.rotation,
+          scale: selectedMedia.mesh.scale,
+          position: { x: 0, y: selectedMedia.mesh.position.y, z: 0 },
+        },
+        (_) => {
+          selectedMedia.opacity.multiplier = 1;
+
+          map(this.medias, (media) => {
+            if (media !== selectedMedia) {
+              media.show();
+            }
+          });
+
+          this.scroll.current =
+            this.scroll.target =
+            this.scroll.start =
+            this.scroll.last =
+              scroll;
+        },
+      );
+    } else {
+      map(this.medias, (media) => {
+        media.show();
+      });
+    }
   }
 
   hide() {
@@ -122,7 +165,6 @@ export default class Collections {
     this.index = index;
     const selectedCollection = parseInt(
       this.mediaElements[this.index].getAttribute("data-collection-index"),
-      10,
     );
     map(this.collectionArticles, (element, index) => {
       if (index === selectedCollection) {
@@ -132,17 +174,14 @@ export default class Collections {
       }
     });
     this.collectionTitles.style[this.transformPrefix] =
-      `translateY(${-25 * selectedCollection}%)  translate(-50%,-50%) rotate(-90deg)`;
+      `translateY(-${25 * selectedCollection}%)  translate(-50%,-50%) rotate(-90deg)`;
   }
 
   /**
    *
-   * @param {{x:number, y:number}} {x, y}
    * Scroll update
    */
   update() {
-    if (!this.bounds) return;
-
     this.scroll.target = gsap.utils.clamp(
       -this.scroll.limit,
       0,
@@ -169,14 +208,19 @@ export default class Collections {
     this.scroll.last = this.scroll.current;
 
     const currentIndex = Math.floor(
-      Math.abs(this.scroll.current / this.scroll.limit) * this.medias.length,
+      Math.abs(
+        (this.scroll.current - this.medias[0].bounds.width / 2) /
+          this.scroll.limit,
+      ) *
+        (this.medias.length - 1),
     );
+
     if (this.index !== currentIndex) {
       this.onChangeCurrent(currentIndex);
     }
 
     map(this.medias, (media, _) => {
-      media.update(this.scroll.current);
+      media.update(this.scroll.current, this.index);
     });
   }
 

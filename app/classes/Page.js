@@ -133,25 +133,30 @@ export default class Page {
    * @description This method is called to show the page
    */
 
-  show() {
+  show(animation) {
     return new Promise((resolve) => {
       ColorManager.change({
         backgroundColor: this.element.getAttribute("data-background"),
         color: this.element.getAttribute("data-color"),
       });
-      this.animateIn = gsap.timeline();
 
-      this.animateIn.fromTo(
-        this.element,
-        {
-          autoAlpha: 0,
-        },
-        { autoAlpha: 1 },
-      );
-      this.animateIn.call((_) => {
-        this.addEventListeners();
-        resolve();
-      });
+      if (animation) {
+        this.animateIn = animation;
+      } else {
+        this.animateIn = gsap.timeline();
+
+        this.animateIn.fromTo(
+          this.element,
+          {
+            autoAlpha: 0,
+          },
+          { autoAlpha: 1 },
+        );
+        this.animateIn.call((_) => {
+          this.addEventListeners();
+          resolve();
+        });
+      }
     });
   }
   /**

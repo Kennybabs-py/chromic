@@ -16,7 +16,7 @@ void main() {
 
     // newPosition.z += sin(newPosition.y / uViewportSizes.y * (PI) * (PI) / 2.0) * abs(uSpeed);
     // uSpeed causes distortionon the frame when a user drags the page
-    newPosition.z *= sin((newPosition.y / uViewportSizes.y) * (newPosition.x / uViewportSizes.x) * (PI) + (PI) / 2.0) * 1.0 + abs(uSpeed);
+    newPosition.z -= (sin((newPosition.y / uViewportSizes.y) * (PI) + (PI) / 2.0) + sin((newPosition.x / uViewportSizes.x) * (PI) + (PI) / 2.0)) * abs(uSpeed);
 
     gl_Position = projectionMatrix * newPosition;
 }

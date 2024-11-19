@@ -18,10 +18,6 @@ export default class Gallery {
 
     this.group = new Transform();
 
-    // this.createTexture();
-    // this.createProgram();
-    // this.createMesh();
-
     this.scroll = {
       start: 0,
       current: 0,
@@ -35,6 +31,7 @@ export default class Gallery {
       x: 0,
       y: 0,
     };
+    this.onResize({ sizes: this.sizes });
 
     this.createMedias();
     this.group.setParent(this.scene);
@@ -121,7 +118,6 @@ export default class Gallery {
    * Scroll update
    */
   update(scroll) {
-    if (!this.bounds) return;
     // Distance from top of screen to get speed of translation when scrolling
     const distance = (scroll.current - scroll.target) * 0.1;
 

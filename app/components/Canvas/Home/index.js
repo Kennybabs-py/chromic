@@ -48,6 +48,7 @@ export default class Home {
 
     this.createGeometry();
     this.createGallery();
+    this.onResize({ sizes: this.sizes });
 
     this.group.setParent(this.scene);
     this.show();
@@ -108,6 +109,8 @@ export default class Home {
    * onTouchDown for canvas
    */
   onTouchDown({ x, y }) {
+    // this.speed.target = 1;
+
     this.scrollCurrent.x = this.scroll.x;
     this.scrollCurrent.y = this.scroll.y;
   }
@@ -128,7 +131,9 @@ export default class Home {
    * @param {Event} event
    * onTouchUp for canvas
    */
-  onTouchUp({ x, y }) {}
+  onTouchUp({ x, y }) {
+    // this.speed.target = 0;
+  }
 
   onWheel({ pixelY, pixelX }) {
     this.x.target += pixelX;
@@ -141,8 +146,6 @@ export default class Home {
    * Scroll update
    */
   update() {
-    if (!this.galleryBounds) return;
-
     // Using pythagoras to get the speed of cursor or touch movement from a current
     // to a target position
     const a = this.x.target - this.x.current;
@@ -186,11 +189,12 @@ export default class Home {
 
     map(this.medias, (media, _) => {
       const meshScaleX = media.mesh.scale.x / 2;
+      const offsetX = this.sizes.width * 0.6;
 
       // Infinite scrolling in any direction
       if (this.x.direction === "left") {
         const x = media.mesh.position.x + meshScaleX;
-        if (x < -this.sizes.width / 2) {
+        if (x < -offsetX) {
           media.extra.x += this.gallerySizes.width;
           media.mesh.rotation.z = gsap.utils.random(
             -Math.PI * 0.03,
@@ -200,7 +204,7 @@ export default class Home {
       } else if (this.x.direction === "right") {
         const x = media.mesh.position.x - meshScaleX;
 
-        if (x > this.sizes.width / 2) {
+        if (x > offsetX) {
           media.extra.x -= this.gallerySizes.width;
           media.mesh.rotation.z = gsap.utils.random(
             -Math.PI * 0.03,
@@ -210,11 +214,12 @@ export default class Home {
       }
 
       const meshScaleY = media.mesh.scale.y / 2;
+      const offsetY = this.sizes.height * 0.6;
 
       if (this.y.direction === "top") {
         const y = media.mesh.position.y + meshScaleY;
 
-        if (y < -this.sizes.height / 2) {
+        if (y < -offsetY) {
           media.extra.y += this.gallerySizes.height;
           media.mesh.rotation.z = gsap.utils.random(
             -Math.PI * 0.03,
@@ -224,7 +229,7 @@ export default class Home {
       } else if (this.y.direction === "bottom") {
         const y = media.mesh.position.y - meshScaleY;
 
-        if (y > this.sizes.height / 2) {
+        if (y > offsetY) {
           media.extra.y -= this.gallerySizes.height;
           media.mesh.rotation.z = gsap.utils.random(
             -Math.PI * 0.03,
