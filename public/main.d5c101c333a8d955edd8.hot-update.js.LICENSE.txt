@@ -1,0 +1,11 @@
+/*! gsap */
+
+/*! ogl */
+
+/*! shaders/about-fragment.frag */
+
+/*! shaders/about-vertex.vert */
+
+/*!**********************************************!*\
+  !*** ./app/components/Canvas/About/Media.js ***!
+  \**********************************************/

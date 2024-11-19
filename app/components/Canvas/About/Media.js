@@ -1,8 +1,8 @@
 import { Program, Mesh } from "ogl";
 import gsap from "gsap";
 
-import vertex from "shaders/plane-vertex.vert";
-import fragment from "shaders/plane-fragment.frag";
+import vertex from "shaders/about-vertex.vert";
+import fragment from "shaders/about-fragment.frag";
 
 export default class Media {
   constructor({ element, index, geometry, gl, scene, sizes }) {
@@ -35,7 +35,12 @@ export default class Media {
     this.program = new Program(this.gl, {
       vertex: vertex,
       fragment: fragment,
-      uniforms: { uAlpha: { value: 0 }, tMap: { value: this.texture } },
+      uniforms: {
+        uAlpha: { value: 0 },
+        tMap: { value: this.texture },
+        uSpeed: { value: 0 },
+        uTime: { value: 0 },
+      },
     });
   }
 
@@ -124,5 +129,9 @@ export default class Media {
 
     this.updateX(scroll);
     this.updateY(0);
+
+    // Paper Distortion on Texture
+    this.program.uniforms.uTime.value += 0.0002;
+    this.program.uniforms.uSpeed.value = scroll * 0.00001;
   }
 }
