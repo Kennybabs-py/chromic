@@ -1,4 +1,5 @@
 import EventEmitter from "events";
+import AutoBind from "auto-bind";
 import each from "lodash/each";
 
 /**
@@ -14,12 +15,17 @@ import each from "lodash/each";
  *
  */
 export default class Component extends EventEmitter {
-  constructor({ element, elements }) {
+  constructor({ classes, element, elements }) {
     super();
+
+    AutoBind(this);
+
+    this.classes = classes;
     this.selector = element;
     this.selectorChildren = { ...elements };
 
     this.create();
+
     this.addEventListeners();
   }
 

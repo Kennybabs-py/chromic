@@ -1,16 +1,19 @@
 %vertical-titles {
-  display: flex;
-  align-items: center;
-  position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) rotate(-90deg);
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
 }
+
+%vertical-titles__item {
+}
+
 %vertical-titles__label {
   @extend %description-12;
-  transform: rotate(90deg);
+
+  height: 16rem;
   letter-spacing: 0.1rem;
-  margin: 0 3rem;
+  position: relative;
   text-align: center;
   text-transform: uppercase;
 
@@ -18,7 +21,43 @@
     font-size: 1.2rem;
   }
 }
+
+%vertical-titles__label__text {
+  display: inline-block;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  width: 10rem;
+}
+
 %vertical-titles__title {
   @extend %title-200;
-  padding-top: 2rem;
+
+  position: relative;
+
+  &:nth-child(2) {
+    height: 28.6rem;
+  }
+
+  &:nth-child(4) {
+    height: 45.1rem;
+  }
+
+  &:nth-child(6) {
+    height: 53.1rem;
+  }
+
+  &:nth-child(8) {
+    height: 28.8rem;
+  }
+}
+
+%vertical-titles__title__text {
+  display: inline-block;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  white-space: nowrap;
 }

@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@prismicio/client": "^7.3.1",
+    "auto-bind": "^5.0.1",
     "concurrently": "^8.2.2",
     "dotenv": "^16.3.1",
     "errorhandler": "^1.5.1",
@@ -57,6 +58,7 @@
     "morgan": "^1.10.0",
     "node-fetch": "^2.7.0",
     "nodemon": "^3.0.1",
+    "prismic-dom": "^2.2.7",
     "pug": "^3.0.2",
     "ua-parser-js": "^1.0.38"
   }

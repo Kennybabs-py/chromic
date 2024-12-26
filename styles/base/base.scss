@@ -1,57 +1,57 @@
 *,
-*::after,
-*::before {
+*:after,
+*:before {
   box-sizing: border-box;
-  -webkit-user-select: none;
   user-select: none;
 }
+
 html {
-  font-size: calc((100vw / 1920) * 10);
-  line-height: 1;
   @extend %cover;
 
-  position: fixed;
-  overflow: hidden;
-  background-color: $color-contessa;
+  background: $color-contessa;
   color: $color-quarter-spanish-white;
+  font-size: calc(100vw / 1920 * 10);
+  line-height: 1;
+  overflow: hidden;
+  position: fixed;
 
   @include media("<phone") {
-    font-size: calc((100vw / 750) * 10);
+    font-size: calc(100vw / 750 * 10);
   }
 }
 
 body {
-  font-family: $font-suisee-bp;
-  @extend %description-16;
   @extend %cover;
+  @extend %description-18;
 
+  font-family: $font-suisse-bp;
   position: fixed;
 }
 
 a {
-  text-decoration: none;
-  outline: none;
   color: inherit;
+  outline: none;
+  text-decoration: none;
 }
 
 canvas {
-  position: relative;
   pointer-events: none;
+  position: relative;
   z-index: z("canvas");
 }
 
 button {
   background: none;
-  color: inherit;
-  outline: none;
   border: none;
+  color: inherit;
   cursor: pointer;
+  outline: none;
 }
 
 img {
-  vertical-align: middle;
   opacity: 0;
   transition: opacity 0.4s ease;
+  vertical-align: middle;
 
   &.loaded {
     opacity: 1;
@@ -62,12 +62,36 @@ img {
   @extend %cover;
 }
 
-[data-animation="title"],
 [data-animation="label"],
-[data-animation="paragraph"] {
+[data-animation="paragraph"],
+[data-animation="title"] {
   span {
     display: inline-block;
     overflow: hidden;
     vertical-align: top;
+  }
+}
+
+[data-animation="button"] {
+  display: inline-block;
+  position: relative;
+  white-space: nowrap;
+
+  span {
+    display: inline-block;
+    transform-origin: center center 0.5em;
+    vertical-align: middle;
+  }
+}
+
+[data-animation="link"] {
+  display: inline-block;
+  position: relative;
+  white-space: nowrap;
+
+  span {
+    display: inline-block;
+    transform-origin: center center 0.5em;
+    vertical-align: middle;
   }
 }

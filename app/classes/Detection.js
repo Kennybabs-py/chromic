@@ -5,6 +5,7 @@ class Detection {
 
       this.isPhoneCheck = document.documentElement.classList.contains("phone");
     }
+
     return this.isPhoneCheck;
   }
 
@@ -12,22 +13,32 @@ class Detection {
     if (!this.isTabletChecked) {
       this.isTabletChecked = true;
 
-      this.isTabletCheck =
-        document.documentElement.classList.contains("tablet");
+      this.isTabletCheck = document.documentElement.classList.contains("phone");
     }
+
     return this.isTabletCheck;
   }
 
   isDesktop() {
-    if (!this.isDesktopChecked) {
-      this.isDesktopChecked = true;
+    return !this.isPhone();
+  }
 
-      this.isDesktopCheck =
-        document.documentElement.classList.contains("desktop");
+  isWebPSupported() {
+    if (!this.isWebPChecked) {
+      this.isWebPChecked = true;
+
+      const element = document.createElement("canvas");
+
+      if (element.getContext && element.getContext("2d")) {
+        this.isWebPCheck =
+          element.toDataURL("image/webp").indexOf("data:image/webp") === 0;
+      }
     }
-    return this.isDesktopCheck;
+
+    return this.isWebPCheck;
   }
 }
 
 const DetectionManager = new Detection();
+
 export default DetectionManager;

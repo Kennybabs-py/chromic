@@ -1,4 +1,5 @@
-import Component from "classes/Component";
+import AutoBind from "auto-bind";
+import Prefix from "prefix";
 
 /**
  * @description This class is used to create an animation
@@ -8,14 +9,29 @@ import Component from "classes/Component";
  * new Animation({ element });
  * @exports Animation
  */
-export default class Animation extends Component {
+export default class Animation {
   constructor({ element, elements }) {
-    super({
-      element,
-      elements,
-    });
-    this.createObserver();
-    this.animateOut();
+    AutoBind(this);
+
+    const { animationDelay, animationTarget } = element.dataset;
+
+    this.delay = animationDelay;
+
+    this.element = element;
+    this.elements = elements;
+
+    this.target = animationTarget ? element.closest(animationTarget) : element;
+    this.transformPrefix = Prefix("transform");
+
+    this.isVisible = false;
+
+    if ("IntersectionObserver" in window) {
+      this.createObserver();
+
+      this.animateOut();
+    } else {
+      this.animateIn();
+    }
   }
 
   /**
@@ -29,16 +45,20 @@ export default class Animation extends Component {
   createObserver() {
     this.observer = new window.IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
+        if (!this.isVisible && entry.isIntersecting) {
           this.animateIn();
         } else {
           this.animateOut();
         }
       });
-    });
-    this.observer.observe(this.element);
+    }).observe(this.target);
   }
 
-  animateIn() {}
-  animateOut() {}
+  animateIn() {
+    this.isVisible = true;
+  }
+
+  animateOut() {
+    this.isVisible = false;
+  }
 }

@@ -1,31 +1,34 @@
 .preloader {
   @extend %cover;
   @extend %center;
+
   text-align: center;
   background-color: $color-contessa;
   color: $color-quarter-spanish-white;
   z-index: z("preloader");
 }
 .preloader__text {
-  max-width: 68rem;
-  font-size: 0;
+  @extend %title-53;
 
-  span {
-    display: inline-block;
-    overflow: hidden;
-  }
+  max-width: 67rem;
+  opacity: 0;
 
   span span {
     @extend %title-53;
+
+    display: inline-block;
+    transform-origin: center center 0.5em;
   }
 }
+
 .preloader__number {
+  @extend %description-14;
+
   position: absolute;
   overflow: hidden;
   bottom: 7.3rem;
   left: 50%;
   transform: translateX(-50%);
-  @extend %description-14;
 
   @include media("<phone") {
     font-size: 2.4rem;

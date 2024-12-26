@@ -7,6 +7,8 @@ const path = require("path");
 const logger = require("morgan");
 const methodOverride = require("method-override");
 const prismic = require("@prismicio/client");
+const PrismicDOM = require("prismic-dom");
+
 const fetch = require("node-fetch");
 const { UAParser } = require("ua-parser-js");
 
@@ -80,6 +82,7 @@ app.use((req, res, next) => {
     indexResolver: handleIndexResolver,
   };
   res.locals.prismic = prismic;
+  res.locals.PrismicDOM = PrismicDOM;
   res.locals.endpoint = process.env.PRISMIC_ENDPOINT;
   res.locals.linkResolver = handleLinkResolver;
   res.locals.indexResolver = handleIndexResolver;

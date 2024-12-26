@@ -1,8 +1,14 @@
 %page {
   @extend %cover;
-  z-index: z("content");
+
   opacity: 0;
   visibility: hidden;
+  z-index: z("content");
+}
+
+%page--active {
+  opacity: 1;
+  visibility: visible;
 }
 
 %page__wrapper {
