@@ -2,9 +2,9 @@ import each from "lodash/each";
 import normalizeWheel from "normalize-wheel";
 
 import Canvas from "components/Canvas";
-
 import Preloader from "components/Preloader";
 import Navigation from "components/Navigation";
+import Transition from "components/Transition";
 
 import Home from "pages/Home";
 import About from "pages/About";
@@ -25,10 +25,11 @@ import Detail from "pages/Detail";
  */
 class App {
   constructor() {
-    this.createContent();
+    this.template = window.location.pathname;
 
     this.createCanvas();
     this.createPreloader();
+    this.createTransition();
     this.createNavigation();
     this.createPages();
 
@@ -36,6 +37,7 @@ class App {
     this.addEventListeners();
 
     this.onResize();
+
     this.update();
   }
 
@@ -60,14 +62,13 @@ class App {
   createCanvas() {
     this.canvas = new Canvas({ template: this.template });
   }
+
   /**
+   * @method createTransition
    *
-   * @method createContent
-   * @description targets the content element and gets the data-template attribute
    */
-  createContent() {
-    this.content = document.querySelector(".content");
-    this.template = this.content.getAttribute("data-template");
+  createTransition() {
+    this.transition = new Transition();
   }
 
   /**
@@ -75,14 +76,17 @@ class App {
    * @description creates a new instance of each page class and stores the current page in an object
    */
   createPages() {
+    this.about = new About();
+    this.collections = new Collections();
+    this.home = new Home();
+
     this.pages = {
-      about: new About(),
-      collections: new Collections(),
-      detail: new Detail(),
-      home: new Home(),
+      "/": this.home,
+      "/about": this.about,
+      "/collections": this.collections,
     };
+
     this.page = this.pages[this.template];
-    this.page.create();
   }
 
   /**
@@ -125,39 +129,31 @@ class App {
    *
    */
   async onChange({ url, push = true }) {
-    this.canvas.onChangeStart(this.template, url);
+    url = url.replace(window.location.origin, "");
 
-    await this.page.hide();
-    const request = await window.fetch(url);
+    const page = this.pages[url];
 
-    if (request.status === 200) {
-      const html = await request.text();
-      const div = document.createElement("div");
+    await this.transition.show({
+      color: page.element.getAttribute("data-color"),
+    });
 
-      if (push) {
-        window.history.pushState({}, "", url);
-      }
-
-      div.innerHTML = html;
-      const divContent = div.querySelector(".content");
-      this.template = divContent.getAttribute("data-template");
-
-      this.navigation.onChange(this.template);
-
-      this.content.innerHTML = divContent.innerHTML;
-      this.content.setAttribute("data-template", this.template);
-
-      this.canvas.onChangeEnd(this.template);
-
-      this.page = this.pages[this.template];
-      this.page.create();
-      this.onResize();
-      await this.page.show();
-
-      this.addLinkListeners();
-    } else {
-      console.log("Error", request.status);
+    if (push) {
+      window.history.pushState({}, "", url);
     }
+
+    this.template = window.location.pathname;
+
+    this.page.hide();
+
+    this.navigation.onChange(this.template);
+    this.canvas.onChange(this.template);
+
+    this.page = page;
+    this.page.show();
+
+    this.onResize();
+
+    this.transition.hide();
   }
 
   /**
@@ -185,6 +181,10 @@ class App {
     if (this.canvas && this.canvas.onTouchDown) {
       this.canvas.onTouchDown(event);
     }
+
+    if (this.page && this.page.onTouchDown) {
+      this.page.onTouchDown(event);
+    }
   }
   /**
    *
@@ -195,6 +195,10 @@ class App {
     if (this.canvas && this.canvas.onTouchMove) {
       this.canvas.onTouchMove(event);
     }
+
+    if (this.page && this.page.onTouchDown) {
+      this.page.onTouchMove(event);
+    }
   }
   /**
    *
@@ -204,6 +208,10 @@ class App {
   onTouchUp(event) {
     if (this.canvas && this.canvas.onTouchUp) {
       this.canvas.onTouchUp(event);
+    }
+
+    if (this.page && this.page.onTouchDown) {
+      this.page.onTouchUp(event);
     }
   }
 
@@ -219,6 +227,10 @@ class App {
     }
     if (this.canvas && this.canvas.onWheel) {
       this.canvas.onWheel(normalizedWheel);
+    }
+
+    if (this.page && this.page.onWheel) {
+      this.page.onWheel(normalizedWheel);
     }
   }
   /**
@@ -245,7 +257,8 @@ class App {
    * @description add event listeners to the window entry point
    */
   addEventListeners() {
-    window.addEventListener("wheel", this.onWheel.bind(this));
+    window.addEventListener("popstate", this.onPopState.bind(this));
+    window.addEventListener("mousewheel", this.onWheel.bind(this));
 
     window.addEventListener("mousedown", this.onTouchDown.bind(this));
     window.addEventListener("mousemove", this.onTouchMove.bind(this));
@@ -255,7 +268,6 @@ class App {
     window.addEventListener("touchmove", this.onTouchMove.bind(this));
     window.addEventListener("touchend", this.onTouchUp.bind(this));
 
-    window.addEventListener("popstate", this.onPopState.bind(this));
     window.addEventListener("resize", this.onResize.bind(this));
   }
 
@@ -266,12 +278,28 @@ class App {
    */
   addLinkListeners() {
     const links = document.querySelectorAll("a");
+
     each(links, (link) => {
-      link.onclick = (event) => {
-        event.preventDefault();
-        const { href } = link;
-        this.onChange({ url: href });
-      };
+      const isLocal = link.href.indexOf(window.location.origin) > -1;
+
+      const isNotEmail = link.href.indexOf("mailto") === -1;
+      const isNotPhone = link.href.indexOf("tel") === -1;
+
+      if (isLocal) {
+        link.onclick = (event) => {
+          event.preventDefault();
+
+          this.onChange({
+            url: link.href,
+          });
+        };
+
+        link.onmouseenter = (event) => this.onLinkMouseEnter(link);
+        link.onmouseleave = (event) => this.onLinkMouseLeave(link);
+      } else if (isNotEmail && isNotPhone) {
+        link.rel = "noopener";
+        link.target = "_blank";
+      }
     });
   }
 }
