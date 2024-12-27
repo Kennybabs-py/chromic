@@ -36,7 +36,7 @@ export default class About {
   }
 
   show() {
-    this.group.setParent(scene);
+    this.group.setParent(this.scene);
 
     map(this.galleries, (gallery) => {
       gallery.show();
