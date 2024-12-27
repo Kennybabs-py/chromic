@@ -1,19 +1,18 @@
 import map from "lodash/map";
 import { Plane, Transform } from "ogl";
-import gsap from "gsap";
 
 import Gallery from "./Gallery";
+
 export default class About {
   constructor({ gl, scene, sizes }) {
     this.gl = gl;
-    this.group = new Transform();
+    this.scene = scene;
     this.sizes = sizes;
+    this.group = new Transform();
 
     this.createGeometry();
     this.createGalleries();
     this.onResize({ sizes: this.sizes });
-
-    this.group.setParent(scene);
 
     this.show();
   }
@@ -37,12 +36,16 @@ export default class About {
   }
 
   show() {
+    this.group.setParent(this.scene);
+
     map(this.galleries, (gallery) => {
       gallery.show();
     });
   }
 
   hide() {
+    this.group.setParent(null);
+
     map(this.galleries, (gallery) => {
       gallery.hide();
     });
