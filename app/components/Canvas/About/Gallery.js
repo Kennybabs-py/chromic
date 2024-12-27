@@ -31,9 +31,10 @@ export default class Gallery {
       x: 0,
       y: 0,
     };
+    this.createMedias();
+
     this.onResize({ sizes: this.sizes });
 
-    this.createMedias();
     this.group.setParent(this.scene);
   }
 
@@ -82,7 +83,7 @@ export default class Gallery {
     this.scroll.current = this.scroll.target = 0;
 
     map(this.medias, (media) => {
-      media.onResize(event, this.scroll.current);
+      media.onResize(event, this.scroll.current, this.galleryWidth);
     });
   }
 
@@ -126,9 +127,11 @@ export default class Gallery {
     // Checks the scroll direction
     if (this.scroll.current < this.scroll.target) {
       this.direction = "right";
+
       this.scroll.velocity = -1;
     } else if (this.scroll.current > this.scroll.target) {
       this.direction = "left";
+
       this.scroll.velocity = 1;
     }
 
@@ -150,6 +153,7 @@ export default class Gallery {
       // Infinite scrolling in any direction
       if (this.direction === "left") {
         const x = media.mesh.position.x + meshScaleX;
+
         if (x < -this.sizes.width / 2) {
           media.extra += this.galleryWidth;
         }

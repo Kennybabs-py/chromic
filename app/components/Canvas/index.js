@@ -16,6 +16,7 @@ export default class Canvas {
       distance: 0,
       end: 0,
     };
+
     this.y = {
       start: 0,
       distance: 0,
@@ -47,12 +48,6 @@ export default class Canvas {
     this.home = new Home({ gl: this.gl, scene: this.scene, sizes: this.sizes });
   }
 
-  destroyHome() {
-    if (!this.home) return;
-    this.home.destroy();
-    this.home = null;
-  }
-
   createAbout() {
     this.about = new About({
       gl: this.gl,
@@ -61,25 +56,15 @@ export default class Canvas {
     });
   }
 
-  destroyAbout() {
-    if (!this.about) return;
-    this.about.destroy();
-    this.about = null;
-  }
-
   createCollections() {
     this.collections = new Collections({
+      camera: this.camera,
+      renderer: this.renderer,
       gl: this.gl,
       scene: this.scene,
       sizes: this.sizes,
       transition: this.transition,
     });
-  }
-
-  destroyCollections() {
-    if (!this.collections) return;
-    this.collections.destroy();
-    this.collections = null;
   }
 
   createDetail() {
@@ -91,87 +76,47 @@ export default class Canvas {
     });
   }
 
-  destroyDetail() {
-    if (!this.detail) return;
-    this.detail.destroy();
-    this.detail = null;
-  }
-
   onPreloaded() {
-    this.onChangeEnd(this.template);
+    this.createAbout();
+    this.createCollections();
+    this.createHome();
+
+    this.onChange(this.template, true);
   }
 
   /**
    * for hiding canvas on an active page
    * @argument {template, url} string
    */
-  onChangeStart(template, url) {
-    this.isFromCollectionstToDetail =
-      this.template === "collections" && url.indexOf("detail") > -1;
-    this.isFromDetailToCollections =
-      this.template === "detail" && url.indexOf("collections") > -1;
-
-    if (this.home) {
-      this.home.hide();
-    }
-    if (this.about) {
+  onChange(template, isPreloaded) {
+    if (template === "/about") {
+      this.about.show(isPreloaded);
+    } else {
       this.about.hide();
     }
-    if (this.collections) {
+
+    if (template === "/collections") {
+      this.collections.show(isPreloaded);
+    } else {
       this.collections.hide();
     }
 
-    if (this.detail) {
-      this.detail.hide();
+    if (template === "/") {
+      this.home.show(isPreloaded);
+    } else {
+      this.home.hide();
     }
 
-    if (this.isFromCollectionstToDetail || this.isFromDetailToCollections) {
-      this.transition = new Transition({
-        url: url,
-        gl: this.gl,
-        scene: this.scene,
-        sizes: this.sizes,
-      });
-
-      this.transition.setElement(this.collections || this.detail);
-    }
-  }
-
-  /**
-   * creates active page scene on change of route
-   * @argument {string} template
-   */
-  onChangeEnd(template) {
-    if (template === "home") {
-      this.createHome();
-    } else if (this.home) {
-      this.destroyHome();
-    }
-
-    if (template === "about") {
-      this.createAbout();
-    } else if (this.about) {
-      this.destroyAbout();
-    }
-    if (template === "collections") {
-      this.createCollections();
-    } else if (this.collections) {
-      this.destroyCollections();
-    }
-
-    if (template === "detail") {
-      this.createDetail();
-    } else if (this.detail) {
-      this.destroyDetail();
-    }
     this.template = template;
   }
 
   onResize() {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+
     this.camera.perspective({
       aspect: window.innerWidth / window.innerHeight,
     });
+
     // fov - field of view
     const fov = (this.camera.fov * Math.PI) / 180;
     const height = 2 * Math.tan(fov / 2) * this.camera.position.z;
@@ -182,17 +127,21 @@ export default class Canvas {
       height,
       width,
     };
-    if (this.home) {
-      this.home.onResize({ sizes: this.sizes });
-    }
+
+    const values = {
+      sizes: this.sizes,
+    };
+
     if (this.about) {
-      this.about.onResize({ sizes: this.sizes });
+      this.about.onResize(values);
     }
+
     if (this.collections) {
-      this.collections.onResize({ sizes: this.sizes });
+      this.collections.onResize(values);
     }
-    if (this.detail) {
-      this.detail.onResize({ sizes: this.sizes });
+
+    if (this.home) {
+      this.home.onResize(values);
     }
   }
 
@@ -207,17 +156,21 @@ export default class Canvas {
     this.x.start = event.touches ? event.touches[0].clientX : event.clientX;
     this.y.start = event.touches ? event.touches[0].clientY : event.clientY;
 
-    if (this.home) {
-      this.home.onTouchDown({ x: this.x.start, y: this.y.start });
-    }
+    const values = {
+      x: this.x,
+      y: this.y,
+    };
+
     if (this.about) {
-      this.about.onTouchDown({ x: this.x.start, y: this.y.start });
+      this.about.onTouchDown(values);
     }
+
     if (this.collections) {
-      this.collections.onTouchDown({ x: this.x.start, y: this.y.start });
+      this.collections.onTouchDown(values);
     }
-    if (this.detail) {
-      this.detail.onTouchDown({ x: this.x.start, y: this.y.start });
+
+    if (this.home) {
+      this.home.onTouchDown(values);
     }
   }
   /**
@@ -234,18 +187,23 @@ export default class Canvas {
     this.x.end = x;
     this.y.end = y;
 
-    if (this.home) {
-      this.home.onTouchMove({ x: this.x, y: this.y });
+    const values = {
+      x: this.x,
+      y: this.y,
+    };
+
+    if (this.collections) {
+      this.collections.onTouchMove(values);
     }
 
+    if (!this.isDown) return;
+
     if (this.about) {
-      this.about.onTouchMove({ x: this.x, y: this.y });
+      this.about.onTouchMove(values);
     }
-    if (this.collections) {
-      this.collections.onTouchMove({ x: this.x, y: this.y });
-    }
-    if (this.detail) {
-      this.detail.onTouchMove({ x: this.x, y: this.y });
+
+    if (this.home) {
+      this.home.onTouchMove(values);
     }
   }
   /**
@@ -255,6 +213,7 @@ export default class Canvas {
    */
   onTouchUp(event) {
     this.isDown = false;
+
     const x = event.changedTouches
       ? event.changedTouches[0].clientX
       : event.clientX;
@@ -265,17 +224,21 @@ export default class Canvas {
     this.x.end = x;
     this.y.end = y;
 
-    if (this.home) {
-      this.home.onTouchUp({ x: this.x, y: this.y });
-    }
+    const values = {
+      x: this.x,
+      y: this.y,
+    };
+
     if (this.about) {
-      this.about.onTouchUp({ x: this.x, y: this.y });
+      this.about.onTouchUp(values);
     }
+
     if (this.collections) {
-      this.collections.onTouchUp({ x: this.x, y: this.y });
+      this.collections.onTouchUp(values);
     }
-    if (this.detail) {
-      this.detail.onTouchUp({ x: this.x, y: this.y });
+
+    if (this.home) {
+      this.home.onTouchUp(values);
     }
   }
 
@@ -301,7 +264,6 @@ export default class Canvas {
     if (this.detail) {
       this.detail.update();
     }
-    this.renderer.render({ camera: this.camera, scene: this.scene });
     this.renderer.render({ camera: this.camera, scene: this.scene });
   }
 }

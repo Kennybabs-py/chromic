@@ -13,21 +13,22 @@ export default class Media {
     this.sizes = sizes;
     this.index = index;
 
-    this.createTexture();
-    this.createProgram();
-    this.createMesh();
-
     // The recurring dom element after scroll
     this.extra = {
       x: 0,
       y: 0,
     };
 
+    this.createTexture();
+    this.createProgram();
+    this.createMesh();
     this.createBounds({ sizes: this.sizes });
   }
 
   createTexture() {
-    this.texture = window.TEXTURES[this.element.getAttribute("data-src")];
+    const image = this.element;
+
+    this.texture = window.TEXTURES[image.getAttribute("data-src")];
   }
 
   createProgram() {
@@ -51,12 +52,13 @@ export default class Media {
 
     this.mesh.setParent(this.scene);
 
-    this.mesh.rotation.z = gsap.utils.random(-Math.PI * 0.03, Math.PI * 0.03);
+    // this.mesh.rotation.z = gsap.utils.random(-Math.PI * 0.03, Math.PI * 0.03);
   }
 
   createBounds({ sizes }) {
     // The width and height of the canvas field of view
     this.sizes = sizes;
+
     this.bounds = this.element.getBoundingClientRect();
 
     this.updateScale();
@@ -64,12 +66,42 @@ export default class Media {
     this.updateY();
   }
 
-  show() {
-    gsap.fromTo(this.program.uniforms.uAlpha, { value: 0 }, { value: 0.4 });
+  show(isPreloaded) {
+    const delay = isPreloaded ? 2.5 : 0;
+
+    this.timelineIn = GSAP.timeline({
+      delay: gsap.utils.random(delay, delay + 1.5),
+    });
+
+    this.timelineIn.fromTo(
+      this.program.uniforms.uAlpha,
+      {
+        value: 0,
+      },
+      {
+        duration: 2,
+        ease: "expo.inOut",
+        value: 0.4,
+      },
+      "start",
+    );
+
+    this.timelineIn.fromTo(
+      this.mesh.position,
+      {
+        z: GSAP.utils.random(2, 6),
+      },
+      {
+        duration: 2,
+        ease: "expo.inOut",
+        z: 0,
+      },
+      "start",
+    );
   }
 
   hide() {
-    gsap.to(this.program.uniforms.uAlpha, { value: 0 });
+    // gsap.to(this.program.uniforms.uAlpha, { value: 0 });
   }
 
   onResize(event, scroll) {
@@ -79,8 +111,8 @@ export default class Media {
     };
 
     this.createBounds(event);
-    this.updateX(scroll.x);
-    this.updateY(scroll.y);
+    this.updateX(scroll && scroll.x);
+    this.updateY(scroll && scroll.y);
   }
 
   updateScale() {

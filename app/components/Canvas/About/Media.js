@@ -1,6 +1,8 @@
 import { Program, Mesh } from "ogl";
 import gsap from "gsap";
 
+import Detection from "classes/Detection";
+
 import vertex from "shaders/about-vertex.vert";
 import fragment from "shaders/about-fragment.frag";
 
@@ -13,16 +15,15 @@ export default class Media {
     this.sizes = sizes;
     this.index = index;
 
-    this.createTexture();
-    this.createProgram();
-    this.createMesh();
-
     // The recurring dom element after scroll
     this.extra = {
       x: 0,
       y: 0,
     };
 
+    this.createTexture();
+    this.createProgram();
+    this.createMesh();
     this.createBounds({ sizes: this.sizes });
   }
 
@@ -73,6 +74,7 @@ export default class Media {
 
   onResize(event, scroll) {
     this.extra = 0;
+    this.widthTotal = width;
 
     this.createBounds(event);
     this.updateX(scroll);
@@ -115,18 +117,21 @@ export default class Media {
   updateY(y = 0) {
     this.y = (this.bounds.top + y) / window.innerHeight;
 
+    const extra = Detection.isPhone() ? 15 : 60;
+
     this.mesh.position.y =
       this.sizes.height / 2 -
       this.mesh.scale.y / 2 -
       this.y * this.sizes.height;
 
     this.mesh.position.y +=
-      Math.cos((this.mesh.position.x / this.sizes.width) * Math.PI * 0.1) * 50 -
-      50;
+      Math.cos((this.mesh.position.x / this.sizes.width) * Math.PI * 0.1) *
+        extra -
+      extra;
   }
   update(scroll) {
     this.updateRotation();
-
+    this.updateScale();
     this.updateX(scroll);
     this.updateY(0);
 
