@@ -74,7 +74,7 @@ export default class Media {
 
   onResize(event, scroll) {
     this.extra = 0;
-    this.widthTotal = width;
+    this.widthTotal = event.sizes.width;
 
     this.createBounds(event);
     this.updateX(scroll);
