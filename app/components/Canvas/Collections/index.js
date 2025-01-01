@@ -1,32 +1,53 @@
 import map from "lodash/map";
-import { Plane, Transform } from "ogl";
+import { Plane, Raycast, Transform, Vec2 } from "ogl";
 import gsap from "gsap";
 import Prefix from "prefix";
+
 import Media from "./Media";
 
+import { getOffset, mapEach } from "utils/dom";
+
 export default class Collections {
-  constructor({ gl, scene, sizes, transition }) {
+  constructor({ camera, gl, renderer, scene, sizes, transition }) {
     this.id = "collections";
+
+    this.camera = camera;
     this.gl = gl;
+    this.renderer = renderer;
     this.scene = scene;
-    this.group = new Transform();
     this.sizes = sizes;
     this.transition = transition;
 
     this.transformPrefix = Prefix("transform");
 
+    this.group = new Transform();
+
     this.galleryElement = document.querySelector(".collections__gallery");
     this.galleryWrapperElement = document.querySelector(
       ".collections__gallery__wrapper",
     );
-    this.collectionArticles = document.querySelectorAll(
+
+    this.titlesElement = document.querySelector(".collections__titles");
+    this.titlesItemsElements = document.querySelectorAll(
+      ".collections__titles__wrapper:nth-child(2) .collections__titles__item",
+    );
+
+    this.collectionsElement = document.querySelector(".collections");
+    this.collectionsElements = document.querySelectorAll(
       ".collections__article",
     );
-    this.collectionTitles = document.querySelector(".collections__titles");
-    this.collectionArticlesActive = "collections__article--active";
-    this.mediaElements = document.querySelectorAll(
+    this.collectionsElementsLinks = document.querySelectorAll(
+      ".collections__gallery__link",
+    );
+    this.collectionsElementsActive = "collections__article--active";
+
+    this.detailsElements = document.querySelectorAll(".detail");
+    this.mediasElements = document.querySelectorAll(
       ".collections__gallery__media",
     );
+
+    this.mouse = new Vec2();
+
     this.x = {
       current: 0,
       target: 0,
@@ -39,61 +60,72 @@ export default class Collections {
       current: 0,
       target: 0,
       lerp: 0.1,
-      limit: 0,
       velocity: 1,
     };
 
     this.createGeometry();
     this.createGallery();
+
     this.onResize({ sizes: this.sizes });
 
     this.group.setParent(this.scene);
     this.show();
   }
 
+  createRaycast() {
+    this.raycast = new Raycast(this.gl);
+  }
+
   createGeometry() {
     this.geometry = new Plane(this.gl);
   }
+
   createGallery() {
-    this.medias = map(this.mediaElements, (element, index) => {
-      return new Media({
-        element: element,
-        index: index,
+    this.medias = mapEach(this.mediasElements, (element, index) => {
+      const media = new Media({
+        detail: this.detailsElements[index],
+        element,
         geometry: this.geometry,
+        index,
         gl: this.gl,
         scene: this.group,
         sizes: this.sizes,
       });
+
+      media.on("open", this.onOpen.bind(this));
+      media.on("close", this.onClose.bind(this));
+
+      return media;
     });
+
+    this.mediasMeshes = mapEach(this.medias, (media) => media.jewlery);
   }
 
-  show() {
-    if (this.transition) {
-      // this.media.opacity.multiplier = 0;
+  async show() {
+    this.isVisible = true;
 
+    this.group.setParent(this.scene);
+
+    if (this.transition) {
       const { src } = this.transition.mesh.program.uniforms.tMap.value.image;
       const texture = window.TEXTURES[src];
-      const selectedMedia = this.medias.find(
-        (media) => media.texture === texture,
-      );
+      const media = this.medias.find((media) => media.texture === texture);
       const scroll =
-        -selectedMedia.bounds.left -
-        selectedMedia.bounds.width / 2 +
-        window.innerWidth / 2;
+        -media.bounds.left - media.bounds.width / 2 + window.innerWidth / 2;
 
       this.update();
 
       this.transition.animate(
         {
-          rotation: selectedMedia.mesh.rotation,
-          scale: selectedMedia.mesh.scale,
-          position: { x: 0, y: selectedMedia.mesh.position.y, z: 0 },
+          rotation: media.mesh.rotation,
+          scale: media.mesh.scale,
+          position: { x: 0, y: media.mesh.position.y, z: 0 },
         },
         (_) => {
-          selectedMedia.opacity.multiplier = 1;
+          media.opacity.multiplier = 1;
 
           map(this.medias, (media) => {
-            if (media !== selectedMedia) {
+            if (media !== media) {
               media.show();
             }
           });
@@ -113,20 +145,53 @@ export default class Collections {
   }
 
   hide() {
-    map(this.medias, (media) => {
-      media.hide();
+    document.body.style.cursor = "";
+
+    this.isVisible = false;
+
+    this.group.setParent(null);
+
+    mapEach(this.medias, (media) => media.hide());
+  }
+
+  onOpen(index) {
+    this.isVisible = false;
+
+    this.collectionsElement.classList.add("collections--open");
+
+    mapEach(this.medias, (media, mediaIndex) => {
+      if (mediaIndex === index) {
+        media.show();
+      } else {
+        media.hide();
+      }
+    });
+  }
+
+  onClose() {
+    this.isVisible = true;
+
+    this.collectionsElement.classList.remove("collections--open");
+
+    mapEach(this.medias, (media) => {
+      media.show();
     });
   }
 
   onResize(event) {
     this.bounds = this.galleryWrapperElement.getBoundingClientRect();
-    this.sizes = event.sizes;
-    this.scroll.last = this.scroll.target = 0;
-    this.scroll.limit = this.bounds.width - this.medias[0].element.clientWidth;
 
-    map(this.medias, (media) => {
-      media.onResize(event, this.scroll);
+    this.sizes = event.sizes;
+
+    this.scroll.last = this.scroll.target = 0;
+
+    mapEach(this.medias, (media) => media.onResize(event, this.scroll));
+
+    mapEach(this.collectionsElementsLinks, (element, elementIndex) => {
+      element.bounds = getOffset(element);
     });
+
+    this.scroll.limit = this.bounds.width - this.medias[0].element.clientWidth;
   }
 
   /**
@@ -135,6 +200,10 @@ export default class Collections {
    * onTouchDown for canvas
    */
   onTouchDown({ x, y }) {
+    if (!this.isVisible) return;
+
+    this.isDown = true;
+
     this.scroll.last = this.scroll.current;
   }
   /**
@@ -142,18 +211,44 @@ export default class Collections {
    * @param {Event} event
    * onTouchMove for canvas
    */
-  onTouchMove({ x }) {
-    const distance = x.start - x.end;
-    this.scroll.target = this.scroll.last - distance;
+  onTouchMove({ x, y }) {
+    if (!this.isVisible) return;
+
+    this.mouse.set(
+      2.0 * (x.end / this.renderer.width) - 1.0,
+      2.0 * (1.0 - y.end / this.renderer.height) - 1.0,
+    );
+
+    this.raycast.castMouse(this.camera, this.mouse);
+
+    const [hit] = this.raycast.intersectBounds(this.mediasMeshes);
+
+    this.hit = hit ? hit.index : null;
+
+    if (this.hit !== null && this.index === this.hit) {
+      document.body.style.cursor = "pointer";
+    } else {
+      document.body.style.cursor = "";
+    }
   }
   /**
    *
    * @param {Event} event
    * onTouchUp for canvas
    */
-  onTouchUp({ x, y }) {}
+  onTouchUp({ x, y }) {
+    if (!this.isVisible) return;
+
+    this.isDown = false;
+
+    if (this.hit !== null && this.index === this.hit) {
+      this.medias[this.hit].animateIn();
+    }
+  }
 
   onWheel({ pixelY }) {
+    if (!this.isVisible) return;
+
     this.scroll.target += pixelY;
   }
 
@@ -161,20 +256,80 @@ export default class Collections {
    *
    * @param {number} index
    */
-  onChangeCurrent(index) {
+  onChange(index) {
     this.index = index;
+
     const selectedCollection = parseInt(
-      this.mediaElements[this.index].getAttribute("data-collection-index"),
+      this.mediasElements[this.index].getAttribute("data-collection-index"),
     );
-    map(this.collectionArticles, (element, index) => {
-      if (index === selectedCollection) {
-        element.classList.add(this.collectionArticlesActive);
+
+    mapEach(this.collectionsElements, (element, elementIndex) => {
+      if (elementIndex === selectedCollection) {
+        element.classList.add(this.collectionsElementsActive);
       } else {
-        element.classList.remove(this.collectionArticlesActive);
+        element.classList.remove(this.collectionsElementsActive);
       }
     });
-    this.collectionTitles.style[this.transformPrefix] =
-      `translateY(-${25 * selectedCollection}%)  translate(-50%,-50%) rotate(-90deg)`;
+  }
+
+  onUpdateTitle() {
+    const map = {
+      0: 0,
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+    };
+
+    mapEach(this.collectionsElementsLinks, (element, elementIndex) => {
+      const index = element.getAttribute("data-collection-index");
+
+      map[index] += element.bounds.width;
+    });
+
+    const progress = [
+      gsap.utils.clamp(
+        0,
+        1,
+        gsap.utils.mapRange(0, map[0], 0, 1, -this.scroll.current),
+      ),
+      gsap.utils.clamp(
+        0,
+        1,
+        gsap.utils.mapRange(0, map[1], 0, 1, -this.scroll.current - map[0]),
+      ),
+      gsap.utils.clamp(
+        0,
+        1,
+        gsap.utils.mapRange(
+          0,
+          map[2],
+          0,
+          1,
+          -this.scroll.current - map[0] - map[1],
+        ),
+      ),
+      gsap.utils.clamp(
+        0,
+        1,
+        gsap.utils.mapRange(
+          0,
+          map[3],
+          0,
+          1,
+          -this.scroll.current - map[0] - map[1] - map[2],
+        ),
+      ),
+    ];
+
+    let y = 0;
+
+    mapEach(this.titlesItemsElements, (element, index) => {
+      y += element.bounds.height * progress[index];
+    });
+
+    this.titlesElement.style[this.transformPrefix] =
+      `translateY(calc(-${y}px - 33.33% + ${window.innerHeight * 0.5}px))`;
   }
 
   /**

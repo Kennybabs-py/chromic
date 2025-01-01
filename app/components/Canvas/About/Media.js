@@ -72,9 +72,9 @@ export default class Media {
     gsap.to(this.program.uniforms.uAlpha, { value: 0 });
   }
 
-  onResize(event, scroll) {
+  onResize(event, scroll, width) {
     this.extra = 0;
-    this.widthTotal = event.sizes.width;
+    this.widthTotal = width;
 
     this.createBounds(event);
     this.updateX(scroll);

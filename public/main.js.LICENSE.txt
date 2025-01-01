@@ -9,10 +9,30 @@
 */
 
 /*!
+ * CustomEase 3.5.1
+ * https://greensock.com
+ *
+ * @license Copyright 2008-2020, GreenSock. All rights reserved.
+ * Subject to the terms at https://greensock.com/standard-license or for
+ * Club GreenSock members, the agreement issued with that membership.
+ * @author: Jack Doyle, jack@greensock.com
+*/
+
+/*!
  * GSAP 3.12.5
  * https://gsap.com
  *
  * @license Copyright 2008-2024, GreenSock. All rights reserved.
+ * Subject to the terms at https://gsap.com/standard-license or for
+ * Club GSAP members, the agreement issued with that membership.
+ * @author: Jack Doyle, jack@greensock.com
+*/
+
+/*!
+ * paths 3.12.5
+ * https://gsap.com
+ *
+ * Copyright 2008-2024, GreenSock. All rights reserved.
  * Subject to the terms at https://gsap.com/standard-license or for
  * Club GSAP members, the agreement issued with that membership.
  * @author: Jack Doyle, jack@greensock.com
@@ -31,8 +51,6 @@
 /*! ../math/Vec3.js */
 
 /*! ../modules/logger/index.js */
-
-/*! ../node_modules/mini-css-extract-plugin/dist/hmr/hotModuleReplacement.js */
 
 /*! ../utils/log.js */
 
@@ -55,6 +73,8 @@
 /*! ./Mat4.js */
 
 /*! ./Media */
+
+/*! ./Titles */
 
 /*! ./Transform.js */
 
@@ -290,6 +310,8 @@
 
 /*! ./functions/QuatFunc.js */
 
+/*! ./functions/Vec2Func.js */
+
 /*! ./functions/Vec3Func.js */
 
 /*! ./get */
@@ -338,8 +360,6 @@
 
 /*! ./node_modules/webpack-dev-server/client/clients/WebSocketClient.js */
 
-/*! ./normalize-url */
-
 /*! ./numeric-unicode-map */
 
 /*! ./overlay.js */
@@ -376,25 +396,39 @@
 
 /*! ./utils/stripAnsi.js */
 
+/*! animations/Button */
+
 /*! animations/Highlight */
 
 /*! animations/Label */
 
+/*! animations/Link */
+
+/*! animations/Magnetic */
+
 /*! animations/Paragraph */
+
+/*! animations/Parallax */
+
+/*! animations/Rotation */
 
 /*! animations/Title */
 
+/*! animations/Translate */
+
 /*! ansi-html-community */
+
+/*! auto-bind */
 
 /*! classes/Animation */
 
 /*! classes/AsyncLoad */
 
-/*! classes/Button */
-
 /*! classes/Colors */
 
 /*! classes/Component */
+
+/*! classes/Detection */
 
 /*! classes/Page */
 
@@ -404,9 +438,13 @@
 
 /*! components/Preloader */
 
+/*! components/Transition */
+
 /*! events */
 
 /*! gsap */
+
+/*! gsap/utils/paths */
 
 /*! html-entities */
 
@@ -446,7 +484,17 @@
 
 /*! tapable/lib/SyncBailHook */
 
+/*! utils/CustomEase */
+
+/*! utils/breakpoints */
+
 /*! utils/colors */
+
+/*! utils/dom */
+
+/*! utils/easings */
+
+/*! utils/math */
 
 /*! utils/text */
 
@@ -459,6 +507,14 @@
 /*!**********************!*\
   !*** ./app/index.js ***!
   \**********************/
+
+/*!**************************!*\
+  !*** ./app/utils/dom.js ***!
+  \**************************/
+
+/*!***************************!*\
+  !*** ./app/utils/math.js ***!
+  \***************************/
 
 /*!***************************!*\
   !*** ./app/utils/text.js ***!
@@ -476,13 +532,17 @@
   !*** ./app/utils/colors.js ***!
   \*****************************/
 
-/*!*******************************!*\
-  !*** ./app/classes/Button.js ***!
-  \*******************************/
+/*!******************************!*\
+  !*** ./app/utils/easings.js ***!
+  \******************************/
 
 /*!*******************************!*\
   !*** ./app/classes/Colors.js ***!
   \*******************************/
+
+/*!********************************!*\
+  !*** ./app/animations/Link.js ***!
+  \********************************/
 
 /*!*********************************!*\
   !*** ./app/animations/Label.js ***!
@@ -495,6 +555,14 @@
 /*!*********************************!*\
   !*** ./app/pages/Home/index.js ***!
   \*********************************/
+
+/*!*********************************!*\
+  !*** ./app/utils/CustomEase.js ***!
+  \*********************************/
+
+/*!**********************************!*\
+  !*** ./app/animations/Button.js ***!
+  \**********************************/
 
 /*!**********************************!*\
   !*** ./app/classes/Animation.js ***!
@@ -509,7 +577,19 @@
   \**********************************/
 
 /*!**********************************!*\
+  !*** ./app/classes/Detection.js ***!
+  \**********************************/
+
+/*!**********************************!*\
   !*** ./app/pages/About/index.js ***!
+  \**********************************/
+
+/*!**********************************!*\
+  !*** ./app/pages/Home/Titles.js ***!
+  \**********************************/
+
+/*!**********************************!*\
+  !*** ./app/utils/breakpoints.js ***!
   \**********************************/
 
 /*!***********************************!*\
@@ -519,6 +599,18 @@
 /*!***********************************!*\
   !*** ./node_modules/lodash/eq.js ***!
   \***********************************/
+
+/*!************************************!*\
+  !*** ./app/animations/Magnetic.js ***!
+  \************************************/
+
+/*!************************************!*\
+  !*** ./app/animations/Parallax.js ***!
+  \************************************/
+
+/*!************************************!*\
+  !*** ./app/animations/Rotation.js ***!
+  \************************************/
 
 /*!************************************!*\
   !*** ./node_modules/gsap/index.js ***!
@@ -538,6 +630,10 @@
 
 /*!*************************************!*\
   !*** ./app/animations/Paragraph.js ***!
+  \*************************************/
+
+/*!*************************************!*\
+  !*** ./app/animations/Translate.js ***!
   \*************************************/
 
 /*!*************************************!*\
@@ -562,6 +658,10 @@
 
 /*!**************************************!*\
   !*** ./app/components/Navigation.js ***!
+  \**************************************/
+
+/*!**************************************!*\
+  !*** ./app/components/Transition.js ***!
   \**************************************/
 
 /*!**************************************!*\
@@ -657,6 +757,10 @@
   \*****************************************/
 
 /*!*****************************************!*\
+  !*** ./node_modules/auto-bind/index.js ***!
+  \*****************************************/
+
+/*!*****************************************!*\
   !*** ./node_modules/lodash/_Promise.js ***!
   \*****************************************/
 
@@ -731,6 +835,10 @@
 /*!*****************************************!*\
   !*** ./node_modules/webpack/hot/log.js ***!
   \*****************************************/
+
+/*!******************************************!*\
+  !*** ./node_modules/gsap/utils/paths.js ***!
+  \******************************************/
 
 /*!******************************************!*\
   !*** ./node_modules/lodash/_DataView.js ***!
@@ -862,6 +970,10 @@
 
 /*!*******************************************!*\
   !*** ./node_modules/ogl/src/math/Quat.js ***!
+  \*******************************************/
+
+/*!*******************************************!*\
+  !*** ./node_modules/ogl/src/math/Vec2.js ***!
   \*******************************************/
 
 /*!*******************************************!*\
@@ -1237,6 +1349,10 @@
   \*********************************************************/
 
 /*!*********************************************************!*\
+  !*** ./node_modules/ogl/src/math/functions/Vec2Func.js ***!
+  \*********************************************************/
+
+/*!*********************************************************!*\
   !*** ./node_modules/ogl/src/math/functions/Vec3Func.js ***!
   \*********************************************************/
 
@@ -1317,10 +1433,6 @@
   \*********************************************************************/
 
 /*!************************************************************************!*\
-  !*** ./node_modules/mini-css-extract-plugin/dist/hmr/normalize-url.js ***!
-  \************************************************************************/
-
-/*!************************************************************************!*\
   !*** ./node_modules/webpack-dev-server/client/modules/logger/index.js ***!
   \************************************************************************/
 
@@ -1339,10 +1451,6 @@
 /*!***************************************************************************!*\
   !*** ./node_modules/webpack-dev-server/client/clients/WebSocketClient.js ***!
   \***************************************************************************/
-
-/*!*******************************************************************************!*\
-  !*** ./node_modules/mini-css-extract-plugin/dist/hmr/hotModuleReplacement.js ***!
-  \*******************************************************************************/
 
 /*!********************************************************************************!*\
   !*** ./node_modules/webpack-dev-server/client/utils/getCurrentScriptSource.js ***!
