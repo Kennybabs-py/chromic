@@ -1,11 +1,9 @@
 import { Camera, Renderer, Transform } from "ogl";
-import gsap from "gsap";
 
 import Home from "./Home";
 import About from "./About";
 import Collections from "./Collections";
 import Detail from "./Detail";
-import Transition from "./Transition";
 
 export default class Canvas {
   constructor({ template }) {
@@ -22,6 +20,7 @@ export default class Canvas {
       distance: 0,
       end: 0,
     };
+
     this.createRenderer();
     this.createCamera();
     this.createScene();
@@ -261,9 +260,7 @@ export default class Canvas {
     if (this.collections) {
       this.collections.update();
     }
-    if (this.detail) {
-      this.detail.update();
-    }
+
     this.renderer.render({ camera: this.camera, scene: this.scene });
   }
 }

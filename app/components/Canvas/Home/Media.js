@@ -69,7 +69,7 @@ export default class Media {
   show(isPreloaded) {
     const delay = isPreloaded ? 2.5 : 0;
 
-    this.timelineIn = GSAP.timeline({
+    this.timelineIn = gsap.timeline({
       delay: gsap.utils.random(delay, delay + 1.5),
     });
 
@@ -89,7 +89,7 @@ export default class Media {
     this.timelineIn.fromTo(
       this.mesh.position,
       {
-        z: GSAP.utils.random(2, 6),
+        z: gsap.utils.random(2, 6),
       },
       {
         duration: 2,

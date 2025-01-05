@@ -1,6 +1,6 @@
 import GSAP from "gsap";
 
-export default class Transition {
+export default class {
   constructor() {
     this.element = document.createElement("canvas");
     this.element.className = "transition";

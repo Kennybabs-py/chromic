@@ -1,23 +1,31 @@
-import { Program, Mesh } from "ogl";
+import { Program, Mesh, Transform } from "ogl";
 import gsap from "gsap";
+
+import Component from "classes/Component";
+import MediaDOM from "./MediaDOM";
 
 import vertex from "shaders/collections-vertex.vert";
 import fragment from "shaders/collections-fragment.frag";
 
-export default class Media {
-  constructor({ element, index, geometry, gl, scene, sizes }) {
-    this.element = element;
+export default class Media extends Component {
+  constructor({ detail, element, index, geometry, gl, scene, sizes }) {
+    super({
+      element,
+      elements: {
+        image: ".collections__gallery__media__image",
+      },
+    });
+
+    this.detail = detail;
     this.gl = gl;
     this.geometry = geometry;
+    this.index = index;
     this.scene = scene;
     this.sizes = sizes;
-    this.index = index;
 
-    // The recurring dom element after scroll
-    this.extra = {
-      x: 0,
-      y: 0,
-    };
+    this.animation = 0;
+    this.group = new Transform();
+    this.frame = 0;
 
     this.opacity = {
       current: 0,
@@ -26,102 +34,215 @@ export default class Media {
       multiplier: 0,
     };
 
-    this.createTexture();
-    this.createProgram();
-    this.createMesh();
+    this.createDetail();
+    this.createJewelry();
+    this.createModel();
+
     this.createBounds({ sizes: this.sizes });
+
+    this.original =
+      -this.sizes.width / 2 +
+      this.jewelry.scale.x / 2 +
+      this.x * this.sizes.width;
+
+    this.group.setParent(this.scene);
   }
 
-  createTexture() {
-    const elementImage = this.element.querySelector(
-      ".collections__gallery__media__image",
-    );
-    this.texture = window.TEXTURES[elementImage.getAttribute("data-src")];
-  }
-
-  createProgram() {
-    this.program = new Program(this.gl, {
-      vertex: vertex,
-      fragment: fragment,
-      uniforms: { uAlpha: { value: 0 }, tMap: { value: this.texture } },
+  createDetail() {
+    this.detailDOM = new MediaDOM({
+      element: this.detail,
     });
+
+    this.detailDOM.on("close", this.animateOut.bind(this));
   }
 
-  createMesh() {
-    this.mesh = new Mesh(this.gl, {
+  createJewelry() {
+    const program = new Program(this.gl, {
+      fragment,
+      vertex,
+      uniforms: {
+        uAlpha: { value: 0 },
+        tMap: {
+          value: window.TEXTURES[this.elements.image.getAttribute("data-src")],
+        },
+      },
+    });
+
+    this.jewelry = new Mesh(this.gl, {
       geometry: this.geometry,
-      program: this.program,
+      program,
     });
 
-    this.mesh.setParent(this.scene);
+    this.jewelry.index = this.index;
+
+    this.jewelry.setParent(this.group);
+  }
+
+  createModel() {
+    const program = new Program(this.gl, {
+      fragment,
+      vertex,
+      uniforms: {
+        uAlpha: { value: 0 },
+        tMap: {
+          value:
+            window.TEXTURES[this.elements.image.getAttribute("data-model-src")],
+        },
+      },
+    });
+
+    this.model = new Mesh(this.gl, {
+      geometry: this.geometry,
+      program,
+    });
+
+    this.model.rotation.y = Math.PI;
+
+    this.model.setParent(this.group);
   }
 
   createBounds({ sizes }) {
-    // The width and height of the canvas field of view
     this.sizes = sizes;
-    this.bounds = this.element.getBoundingClientRect();
+
+    this.collectionsBounds = this.element.getBoundingClientRect();
 
     this.updateScale();
     this.updateX();
-    this.updateY();
   }
 
   show() {
-    gsap.fromTo(this.opacity, { multiplier: 0 }, { multiplier: 1 });
+    gsap.to(this.opacity, { delay: 0.5, multiplier: 1 });
   }
 
   hide() {
     gsap.to(this.opacity, { multiplier: 0 });
+
+    this.detailDOM.animateOut();
   }
 
   onResize(event, scroll) {
-    this.extra = {
-      x: 0,
-      y: 0,
-    };
+    this.detailDOM.onResize();
 
     this.createBounds(event);
-    this.updateX(scroll.x);
-    this.updateY(scroll.y);
+    this.updateX(scroll && scroll.x);
+  }
+
+  animateIn() {
+    gsap.to(this, {
+      animation: 1,
+      duration: 2,
+      ease: "expo.inOut",
+    });
+
+    this.detailDOM.animateIn();
+
+    this.emit("open", this.index);
+  }
+
+  animateOut() {
+    gsap.to(this, {
+      animation: 0,
+      duration: 2,
+      ease: "expo.inOut",
+    });
+
+    this.detailDOM.animateOut();
+
+    this.emit("close", this.index);
   }
 
   updateScale() {
     // To get the percentage of dom width & height in the window
-    this.width = this.bounds.width / window.innerWidth;
-    this.height = this.bounds.height / window.innerHeight;
+    const height = gsap.utils.interpolate(
+      this.collectionsBounds.height,
+      this.detailDOM.bounds.height,
+      this.animation,
+    );
+    const width = gsap.utils.interpolate(
+      this.collectionsBounds.width,
+      this.detailDOM.bounds.width,
+      this.animation,
+    );
 
-    this.mesh.scale.x = this.sizes.width * this.width;
-    this.mesh.scale.y = this.sizes.height * this.height;
+    this.width = width / window.innerWidth;
+    this.height = height / window.innerHeight;
+
+    this.jewelry.scale.x = this.sizes.width * this.width;
+    this.jewelry.scale.y = this.sizes.height * this.height;
+
+    this.model.scale.x = this.sizes.width * this.width;
+    this.model.scale.y = this.sizes.height * this.height;
   }
 
-  updateX(x = 0) {
-    this.x = (this.bounds.left + x) / window.innerWidth;
+  updateX(scroll = 0) {
+    const x = gsap.utils.interpolate(
+      this.collectionsBounds.left + scroll,
+      this.detailDOM.bounds.left,
+      this.animation,
+    );
 
-    this.mesh.position.x =
+    this.x = x / window.innerWidth;
+
+    this.group.position.x =
       -this.sizes.width / 2 +
-      this.mesh.scale.x / 2 +
-      this.x * this.sizes.width +
-      this.extra.x;
+      this.jewelry.scale.x / 2 +
+      this.x * this.sizes.width;
+
+    this.group.position.z = gsap.utils.interpolate(0, 0.1, this.animation);
+
+    this.group.rotation.y = gsap.utils.interpolate(
+      0,
+      2 * Math.PI,
+      this.animation,
+    );
   }
 
-  updateY(y = 0) {
-    this.y = (this.bounds.top + y) / window.innerHeight;
-
-    this.mesh.position.y =
-      this.sizes.height / 2 -
-      this.mesh.scale.y / 2 -
-      this.y * this.sizes.height +
-      this.extra.y;
-  }
   update(scroll, index) {
     this.updateX(scroll);
-    this.updateY(0);
+    this.updateScale();
 
-    const amplitude = 0.1;
-    const frequency = 1;
+    const amplitude = 0.5;
+    const frequency = 500;
 
-    this.mesh.rotation.z = -0.02 * Math.PI * Math.sin(this.index / frequency);
-    this.mesh.position.y = amplitude * Math.sin(this.index / frequency);
+    const sliderY =
+      Math.sin((this.original / 10) * (Math.PI * 2) + this.frame / frequency) *
+      amplitude;
+    const detailY = 0;
+
+    if (this.animation > 0.01) {
+      this.jewelry.program.depthTest = false;
+      this.jewelry.program.depthWrite = false;
+
+      this.model.program.depthTest = false;
+      this.model.program.depthWrite = false;
+    } else {
+      this.jewelry.program.depthTest = true;
+      this.jewelry.program.depthWrite = true;
+
+      this.model.program.depthTest = true;
+      this.model.program.depthWrite = true;
+    }
+
+    this.group.position.y = gsap.utils.interpolate(
+      sliderY,
+      detailY,
+      this.animation,
+    );
+
+    const sliderZ = gsap.utils.mapRange(
+      -this.sizes.width * 0.25,
+      this.sizes.width * 0.25,
+      this.group.position.y * 0.3,
+      -this.group.position.y * 0.3,
+      this.group.position.x,
+    );
+    const detailZ = Math.PI * 0.01;
+
+    this.group.rotation.z = gsap.utils.interpolate(
+      sliderZ,
+      detailZ,
+      this.animation,
+    );
 
     // Setting the opacity of the card
     this.opacity.target = index === this.index ? 1 : 0.4;
@@ -130,8 +251,11 @@ export default class Media {
       this.opacity.target,
       this.opacity.lerp,
     );
-
-    this.program.uniforms.uAlpha.value =
+    this.jewelry.program.uniforms.uAlpha.value =
       this.opacity.multiplier * this.opacity.current;
+    this.model.program.uniforms.uAlpha.value =
+      this.opacity.multiplier * this.opacity.current;
+
+    this.frame += 1;
   }
 }

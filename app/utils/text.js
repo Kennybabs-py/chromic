@@ -2,6 +2,7 @@ import each from "lodash/each";
 
 export function split({ element, expression = " ", append = true }) {
   const words = splitText(element.innerHTML.toString().trim(), expression);
+
   let innerHTML = "";
 
   each(words, (line) => {
@@ -24,13 +25,13 @@ export function split({ element, expression = " ", append = true }) {
     each(spans, (span) => {
       const isSingleLetter = span.textContent.length === 1;
       const isNotEmpty = span.innerHTML.trim() !== "";
-      const isNotAmpersand = span.innerHTML.trim() !== "&";
-      const isNotDashCharacter = span.innerHTML.trim() !== "-";
+      const isNotAndCharacter = span.textContent !== "&";
+      const isNotDashCharacter = span.textContent !== "-";
 
       if (
         isSingleLetter &&
         isNotEmpty &&
-        isNotAmpersand &&
+        isNotAndCharacter &&
         isNotDashCharacter
       ) {
         span.innerHTML = `${span.textContent}&nbsp;`;
@@ -54,6 +55,7 @@ export function calculate(spans) {
 
     if (span.offsetTop !== position) {
       lines.push(words);
+
       words = [];
       words.push(span);
 
@@ -70,13 +72,16 @@ export function calculate(spans) {
 
 function splitText(text, expression) {
   const splits = text.split("<br>");
+
   let words = [];
 
   each(splits, (item, index) => {
     if (index > 0) {
       words.push("<br>");
     }
+
     words = words.concat(item.split(expression));
+
     let isLink = false;
     let link = "";
 
@@ -84,16 +89,18 @@ function splitText(text, expression) {
 
     each(words, (word) => {
       if (!isLink && (word.includes("<a") || word.includes("<strong"))) {
-        isLink = true;
         link = "";
+
+        isLink = true;
       }
 
       if (isLink) {
-        link += `${word}`;
+        link += ` ${word}`;
       }
 
       if (isLink && (word.includes("/a>") || word.includes("/strong>"))) {
-        innerHTML.push(word);
+        innerHTML.push(link);
+
         link = "";
       }
 
@@ -105,6 +112,7 @@ function splitText(text, expression) {
         isLink = false;
       }
     });
+
     words = innerHTML;
   });
 
@@ -112,10 +120,13 @@ function splitText(text, expression) {
 }
 
 function parseLine(line) {
-  line = line.trim();
-  if (line === "" || line === " ") {
+  if (line === "") {
     return line;
+  } else if (line === " ") {
+    return "&nbsp;";
   } else {
+    line = line.trim();
+
     return line === "<br>"
       ? "<br>"
       : `<span>${line}</span>` + (line.length > 1 ? " " : "");

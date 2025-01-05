@@ -1,12 +1,9 @@
 import each from "lodash/each";
 import EventEmitter from "events";
 import AutoBind from "auto-bind";
-import map from "lodash/map";
 import gsap from "gsap";
 import Prefix from "prefix";
 
-import Title from "animations/Title";
-import Label from "animations/Label";
 import Paragraph from "animations/Paragraph";
 import Highlight from "animations/Highlight";
 import Button from "animations/Button";
@@ -293,7 +290,7 @@ export default class Page extends EventEmitter {
 
     this.addEventListeners();
 
-    GSAP.set(document.documentElement, {
+    gsap.set(document.documentElement, {
       backgroundColor: this.element.getAttribute("data-background"),
       color: this.element.getAttribute("data-color"),
     });

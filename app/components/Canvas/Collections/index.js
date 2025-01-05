@@ -22,7 +22,6 @@ export default class Collections {
 
     this.group = new Transform();
 
-    this.galleryElement = document.querySelector(".collections__gallery");
     this.galleryWrapperElement = document.querySelector(
       ".collections__gallery__wrapper",
     );
@@ -48,13 +47,6 @@ export default class Collections {
 
     this.mouse = new Vec2();
 
-    this.x = {
-      current: 0,
-      target: 0,
-      lerp: 0.1,
-      direction: null,
-    };
-
     this.scroll = {
       start: 0,
       current: 0,
@@ -63,13 +55,11 @@ export default class Collections {
       velocity: 1,
     };
 
+    this.createRaycast();
     this.createGeometry();
     this.createGallery();
 
     this.onResize({ sizes: this.sizes });
-
-    this.group.setParent(this.scene);
-    this.show();
   }
 
   createRaycast() {
@@ -98,7 +88,7 @@ export default class Collections {
       return media;
     });
 
-    this.mediasMeshes = mapEach(this.medias, (media) => media.jewlery);
+    this.mediasMeshes = mapEach(this.medias, (media) => media.jewelry);
   }
 
   async show() {
@@ -138,7 +128,7 @@ export default class Collections {
         },
       );
     } else {
-      map(this.medias, (media) => {
+      mapEach(this.medias, (media) => {
         media.show();
       });
     }
@@ -156,6 +146,8 @@ export default class Collections {
 
   onOpen(index) {
     this.isVisible = false;
+
+    console.log(index);
 
     this.collectionsElement.classList.add("collections--open");
 
@@ -179,15 +171,19 @@ export default class Collections {
   }
 
   onResize(event) {
-    this.bounds = this.galleryWrapperElement.getBoundingClientRect();
-
     this.sizes = event.sizes;
+
+    this.bounds = this.galleryWrapperElement.getBoundingClientRect();
 
     this.scroll.last = this.scroll.target = 0;
 
     mapEach(this.medias, (media) => media.onResize(event, this.scroll));
 
     mapEach(this.collectionsElementsLinks, (element, elementIndex) => {
+      element.bounds = getOffset(element);
+    });
+
+    mapEach(this.titlesItemsElements, (element) => {
       element.bounds = getOffset(element);
     });
 
@@ -230,6 +226,12 @@ export default class Collections {
     } else {
       document.body.style.cursor = "";
     }
+
+    if (!this.isDown) return;
+
+    const distance = x.start - x.end;
+
+    this.scroll.target = this.scroll.last - distance;
   }
   /**
    *
@@ -260,7 +262,7 @@ export default class Collections {
     this.index = index;
 
     const selectedCollection = parseInt(
-      this.mediasElements[this.index].getAttribute("data-collection-index"),
+      this.mediasElements[this.index].getAttribute("data-index"),
     );
 
     mapEach(this.collectionsElements, (element, elementIndex) => {
@@ -283,7 +285,6 @@ export default class Collections {
 
     mapEach(this.collectionsElementsLinks, (element, elementIndex) => {
       const index = element.getAttribute("data-collection-index");
-
       map[index] += element.bounds.width;
     });
 
@@ -349,9 +350,6 @@ export default class Collections {
       this.scroll.lerp,
     );
 
-    this.galleryElement.style[this.transformPrefix] =
-      `translateX(-${this.scroll.current}px)`;
-
     // Checks the scroll direction
     if (this.scroll.last < this.scroll.current) {
       this.scroll.direction = "right";
@@ -364,17 +362,19 @@ export default class Collections {
 
     const currentIndex = Math.floor(
       Math.abs(
-        (this.scroll.current - this.medias[0].bounds.width / 2) /
+        (this.scroll.current - this.medias[0].collectionsBounds.width / 2) /
           this.scroll.limit,
       ) *
         (this.medias.length - 1),
     );
 
     if (this.index !== currentIndex) {
-      this.onChangeCurrent(currentIndex);
+      this.onChange(currentIndex);
     }
 
-    map(this.medias, (media, _) => {
+    this.onUpdateTitle();
+
+    mapEach(this.medias, (media, _) => {
       media.update(this.scroll.current, this.index);
     });
   }

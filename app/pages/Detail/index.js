@@ -1,41 +1,47 @@
 import gsap from "gsap";
+
 import Page from "classes/Page";
-import Button from "classes/Button";
+import Detail from "./Detail";
+
+import { mapEach } from "utils/dom";
 
 export default class Detail extends Page {
   constructor() {
     super({
-      id: "detail",
-      element: ".detail",
+      id: "details",
+
+      classes: {
+        active: "details--active",
+      },
+
+      element: ".details",
       elements: {
-        navigation: document.querySelector(".navigation"),
-        button: ".detail__button",
+        details: ".detail",
       },
     });
   }
 
   create() {
     super.create();
-    this.link = new Button({
-      element: this.elements.button,
+
+    this.details = mapEach(this.elements.details, (element) => {
+      return new Detail({
+        element,
+      });
     });
   }
 
-  show() {
-    const timeline = gsap.timeline({ delay: 2 });
-    timeline.fromTo(
-      this.element,
-      {
-        autoAlpha: 0,
-      },
-      { autoAlpha: 1 },
-    );
+  async show(url) {
+    this.element.classList.add(this.classes.active);
 
-    super.show(timeline);
+    return super.show(url);
   }
 
   destroy() {
     super.destroy();
-    this.link.removeEventListeners();
+
+    mapEach(this.details, (element) => {
+      element.destroy();
+    });
   }
 }

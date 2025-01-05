@@ -1,8 +1,6 @@
 block variables
-  - var template = "home";
 
 doctype html
-doctype
 html(lang="en" class=isDesktop ? 'desktop' : isTablet ? 'tablet': isPhone ? 'mobile' : '')
   head
     meta(charset="utf-8")
@@ -11,6 +9,7 @@ html(lang="en" class=isDesktop ? 'desktop' : isTablet ? 'tablet': isPhone ? 'mob
     base(href="/")
 
     title=meta.data.title
+
     meta(name="description", content=meta.data.decription)
 
     link(rel="apple-touch-icon", sizes="180x180", href="/apple-touch-icon.png")
@@ -28,9 +27,13 @@ html(lang="en" class=isDesktop ? 'desktop' : isTablet ? 'tablet': isPhone ? 'mob
     )
     link(rel="manifest", href="/site.webmanifest")
     link(rel="mask-icon", href="/safari-pinned-tab.svg", color="#5bbad5")
+
+    link(rel="stylesheet", href="main.css")
+
+
     meta(name="msapplication-TileColor", content="#da532c")
     meta(name="theme-color", content="#ffffff")
-    link(rel="stylesheet", href="main.css")
+  
 
     meta(propety="og:type", content="website")
     meta(propety="og:title", content=meta.data.title)
@@ -47,18 +50,20 @@ html(lang="en" class=isDesktop ? 'desktop' : isTablet ? 'tablet': isPhone ? 'mob
       content=meta.data.image ? meta.data.image.url : ""
     )
 
-  //- Preffered by awwwards but  link is preferred for readability
-  //- style 
-
   body
     include ./partials/navigation
     include ./partials/preloader
-  
-    #content.content(data-template=template)
-      block content
+
+    include ./pages/about.pug
+    include ./pages/collections.pug
+    include ./pages/home.pug
     
     script.
       window.ASSETS = !{JSON.stringify(assets).replace(/<\//g, "<\\/")}
-
   
     script(src="main.js")
+
+
+
+
+

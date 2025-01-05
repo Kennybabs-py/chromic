@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const find = require("lodash/find");
 const errorHandler = require("errorhandler");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -13,10 +14,11 @@ const fetch = require("node-fetch");
 const { UAParser } = require("ua-parser-js");
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
-const repoName = "chromic";
+const repoName = "floema";
 const accessToken = process.env.PRISMIC_ACCESS_TOKEN;
+const endpoint = process.env.PRISMIC_ENDPOINT;
 
 app.use(logger("dev"));
 app.use(errorHandler());
@@ -33,14 +35,15 @@ app.use(express.static(path.join(__dirname, "public")));
  */
 
 //* Creating a client that connects prismic repo with express paths
-const client = prismic.createClient(repoName, {
+const client = prismic.createClient(endpoint, {
   fetch,
-  accessToken,
+  accessToken: accessToken,
+
   // routes,
 });
 
 function handleLinkResolver(doc) {
-  if (doc.type === "produc") {
+  if (doc.type === "product") {
     return `/detail/${doc.slug}`;
   }
   if (doc.type === "about") {
@@ -49,7 +52,6 @@ function handleLinkResolver(doc) {
   if (doc.type === "collections") {
     return `/collections`;
   }
-  console.log(doc);
   return "/";
 }
 
@@ -71,6 +73,7 @@ function handleIndexResolver(index) {
  */
 app.use((req, res, next) => {
   const ua = new UAParser(req.headers["user-agent"]);
+
   res.locals.isPhone = ua.getDevice().type === "mobile";
   res.locals.isDesktop = ua.getDevice().type === undefined;
   res.locals.isTablet = ua.getDevice().type === "tablet";
@@ -99,12 +102,26 @@ async function handleDefaults(api) {
   const navigation = await api.getSingle("navigation");
   const preloader = await api.getSingle("preloader");
   const home = await client.getSingle("home");
-  const collections = await client.getAllByType("collection", {
-    fetchLinks: "produc.image",
-  });
   const about = await client.getSingle("about");
 
-  let assets = [];
+  const collections = await client.getAllByType("collection", {
+    fetchLinks: "produc.image, produc.model",
+  });
+
+  const productsData = await client.getAllByType("produc", {
+    fetchLinks: "collection.title",
+    pageSize: 100,
+  });
+
+  const assets = [];
+  const products = [];
+
+  collections.forEach((collection) => {
+    collection.data.products.forEach(({ products_product: { uid } }) => {
+      products.push(find(productsData, { uid }));
+    });
+  });
+
   home.data.gallery.forEach((item) => {
     assets.push(item.image.url);
   });
@@ -120,19 +137,29 @@ async function handleDefaults(api) {
     }
   });
 
-  collections.forEach((collection) => {
+  collections.forEach((collection, index) => {
     collection.data.products.forEach((product) => {
       assets.push(product.products_product.data.image.url);
+      assets.push(product.products_product.data.model.url);
     });
   });
 
-  return { assets, meta, navigation, preloader, home, collections, about };
+  return {
+    assets,
+    products,
+    meta,
+    navigation,
+    preloader,
+    home,
+    collections,
+    about,
+  };
 }
 
 //* Home page
 app.get("/", async (req, res) => {
   const defaults = await handleDefaults(client);
-  res.render("pages/home", { ...defaults });
+  res.render("base", { ...defaults });
 });
 
 //* About page
@@ -140,7 +167,7 @@ app.get("/about", async (req, res) => {
   try {
     const defaults = await handleDefaults(client);
 
-    res.render("pages/about", { ...defaults });
+    res.render("base", { ...defaults });
   } catch (error) {
     console.log(`Error: ${error.message}`);
   }
@@ -151,7 +178,7 @@ app.get("/collections", async (req, res) => {
   try {
     const defaults = await handleDefaults(client);
 
-    res.render("pages/collections", {
+    res.render("base", {
       ...defaults,
     });
   } catch (error) {
