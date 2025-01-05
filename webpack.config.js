@@ -55,7 +55,6 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: /node_modules/,
         use: {
           loader: "babel-loader",
         },
@@ -84,7 +83,8 @@ module.exports = {
       },
 
       {
-        test: /\.(jpe?g|png|gif|svg|woff2?|fnt|webp)$/,
+        test: /\.(jpe?g|png|gif|svg|fnt|webp)$/,
+        type: "asset/resource",
         loader: "file-loader",
         options: {
           name(file) {
@@ -94,23 +94,16 @@ module.exports = {
       },
 
       {
+        test: /\.(woff|woff2|eot|ttf|otf)$/i,
+        type: "asset/resource",
+      },
+
+      {
         test: /\.(jpe?g|png|gif|svg|webp)$/i,
+        type: "asset/resource",
         use: [
           {
             loader: ImageMinimizerPlugin.loader,
-            // options: {
-            //   minimizer: {
-            //     implementation: ImageMinimizerPlugin.imageminMinify,
-            //     options: {
-            //       plugins: [
-            //         "imagemin-gifsicle",
-            //         "imagemin-jpegtran",
-            //         "imagemin-optipng",
-            //         "imagemin-svgo",
-            //       ],
-            //     },
-            //   },
-            // },
           },
         ],
       },

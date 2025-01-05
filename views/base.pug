@@ -1,10 +1,10 @@
 block variables
 
 doctype html
-html(lang="en" class=isDesktop ? 'desktop' : isTablet ? 'tablet': isPhone ? 'mobile' : '')
+html(class=isDesktop ? 'desktop' : isTablet ? 'tablet': isPhone ? 'phone' : '' lang="en" )
   head
-    meta(charset="utf-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
 
     base(href="/")
 

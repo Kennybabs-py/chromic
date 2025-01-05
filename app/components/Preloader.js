@@ -118,8 +118,9 @@ export default class Preloader extends Component {
     });
   }
 
-  onAssetLoaded() {
+  onAssetLoaded(image) {
     this.length += 1;
+
     const percent = this.length / window.ASSETS.length;
 
     this.elements.numberText.innerHTML = `${Math.round(percent * 100)}%`;
