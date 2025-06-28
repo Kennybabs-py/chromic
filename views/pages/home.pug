@@ -1,28 +1,22 @@
-extends ../base.pug
+.home(data-background='#c97164' data-color='#f9f1e7')
+  .home__wrapper
+    .home__titles
+      each collection, index in collections
+        .home__titles__label
+          .home__titles__label__text=`${home.data.collection} ${indexResolver(index)}`
 
-block variables
-  - var template = "home";
+        .home__titles__title
+            .home__titles__title__text=collection.data.title
 
-block content
-  .home(data-background='#c97164' data-color='#f9f1e7')
-    .home__wrapper
-      .home__titles
-        each collection, index in collections
-          .home__titles__label
-            .home__titles__label__text=`${home.data.collection} ${indexResolver(index)}`
+    .home__gallery
+      each rows in [0, 1]
+        each media, index in home.data.gallery
+          figure.home__gallery__media(class=`home__gallery__media--${index % 5 + 1}`)
+            img.home__gallery__media__image(alt=media.image.alt, data-src=media.image.url)
 
-          .home__titles__title
-             .home__titles__title__text=collection.data.title
+    a.home__link(data-animation='button' href=linkResolver(home.data.collections))
+      span=home.data.button
 
-      .home__gallery
-        each rows in [0, 1]
-          each media, index in home.data.gallery
-            figure.home__gallery__media(class=`home__gallery__media--${index % 5 + 1}`)
-              img.home__gallery__media__image(alt=media.image.alt, data-src=media.image.url)
-
-      a.home__link(data-animation='button' href=linkResolver(home.data.collections))
-        span=home.data.button
-
-        svg.home__link__icon(xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 60')
-          path(stroke='currentColor' fill='none' d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z')
-          path.home__link__icon__path(stroke='#ffc400' fill='none' d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z')
+      svg.home__link__icon(xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 60')
+        path(stroke='currentColor' fill='none' d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z')
+        path.home__link__icon__path(stroke='#ffc400' fill='none' d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z')

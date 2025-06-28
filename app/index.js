@@ -9,7 +9,7 @@ import Transition from "components/Transition";
 import Home from "pages/Home";
 import About from "pages/About";
 import Collections from "pages/Collections";
-import Detail from "pages/Detail";
+// import Detail from "pages/Detail";
 
 /**
  * @class App
@@ -33,8 +33,8 @@ class App {
     this.createNavigation();
     this.createPages();
 
-    this.addLinkListeners();
     this.addEventListeners();
+    this.addLinkListeners();
 
     this.onResize();
 
@@ -52,6 +52,7 @@ class App {
    */
   createPreloader() {
     this.preloader = new Preloader({ canvas: this.canvas });
+
     this.preloader.once("completed", this.onPreloaded.bind(this));
   }
 
@@ -103,7 +104,9 @@ class App {
    */
   onPreloaded() {
     this.onResize();
+
     this.canvas.onPreloaded();
+
     this.page.show();
   }
 
@@ -222,9 +225,7 @@ class App {
    */
   onWheel(event) {
     const normalizedWheel = normalizeWheel(event);
-    if (this.page && this.page.onWheel) {
-      this.page.onWheel(normalizedWheel);
-    }
+
     if (this.canvas && this.canvas.onWheel) {
       this.canvas.onWheel(normalizedWheel);
     }
@@ -294,8 +295,10 @@ class App {
           });
         };
 
-        link.onmouseenter = (event) => this.onLinkMouseEnter(link);
-        link.onmouseleave = (event) => this.onLinkMouseLeave(link);
+        // link.onmouseenter = (event) => this.onLinkMouseEnter(link);
+        // link.onmouseleave = (event) => this.onLinkMouseLeave(link);
+        link.onmouseenter = (event) => () => {};
+        link.onmouseleave = (event) => () => {};
       } else if (isNotEmail && isNotPhone) {
         link.rel = "noopener";
         link.target = "_blank";
