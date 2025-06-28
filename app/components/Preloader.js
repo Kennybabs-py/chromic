@@ -29,6 +29,7 @@ export default class Preloader extends Component {
     this.canvas = canvas;
 
     window.TEXTURES = {};
+    x;
 
     this.elements.titleSpans = split({
       append: true,

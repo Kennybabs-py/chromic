@@ -39,6 +39,7 @@ export default class Page extends EventEmitter {
     this.classes = {
       ...classes,
     };
+    d;
 
     this.selectors = {
       element,
